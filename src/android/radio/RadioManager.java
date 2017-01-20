@@ -1,4 +1,4 @@
-package com.imsd.radio;
+package com.eltonfaust.multiplayer;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -62,8 +62,10 @@ public class RadioManager implements IRadioManager {
      * @return
      */
     public static RadioManager with(Context mContext) {
-        if (instance == null)
+        if (instance == null) {
             instance = new RadioManager(mContext);
+        }
+
         return instance;
     }
 
@@ -73,14 +75,6 @@ public class RadioManager implements IRadioManager {
      */
     public static RadioPlayerService getService(){
         return mService;
-    }
-
-    /**
-     * Start Radio Streaming
-     * @param streamURL
-     */
-    public void startRadio(String streamURL, String singerName, String songName) {
-      mService.play(streamURL, singerName, songName);
     }
 
     @Override
@@ -120,10 +114,11 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void registerListener(RadioListener mRadioListener) {
-        if (isServiceConnected)
+        if (isServiceConnected) {
             mService.registerListener(mRadioListener);
-        else
+        } else {
             mRadioListenerQueue.add(mRadioListener);
+        }
     }
 
     /**
@@ -165,32 +160,6 @@ public class RadioManager implements IRadioManager {
     }
 
     /**
-     * Update notification data
-     * @param singerName
-     * @param songName
-     * @param smallArt
-     * @param bigArt
-     */
-    @Override
-    public void updateNotification(String singerName, String songName, int smallArt, int bigArt) {
-        if(mService != null)
-            mService.updateNotification(singerName, songName, smallArt, bigArt);
-    }
-
-    /**
-     * Update notification data
-     * @param singerName
-     * @param songName
-     * @param smallArt
-     * @param bigArt
-     */
-    @Override
-    public void updateNotification(String singerName, String songName, int smallArt, Bitmap bigArt) {
-        if(mService != null)
-            mService.updateNotification(singerName, songName, smallArt, bigArt);
-    }
-
-    /**
      * Connection
      */
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -222,8 +191,8 @@ public class RadioManager implements IRadioManager {
      * @param log
      */
     private void log(String log) {
-        if (isLogging)
+        if (isLogging) {
             Log.v("RadioManager", "RadioManagerLog : " + log);
+        }
     }
-
 }

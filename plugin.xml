@@ -6,31 +6,31 @@
 	id="cordova-plugin-multi-player"
 	version="1.0.0">
 
-	<name>Streaming Plugin</name>
-	<description>Streaming Plugin</description>
+	<name>Multi Player Plugin</name>
+	<description>Multi Player Plugin</description>
 	<license>Apache 2.0</license>
 	<keywords>streaming,radio,libaacdecoder</keywords>
 	<repo>https://github.com/EltonFaust/cordova-plugin-multi-player</repo>
 	<issue>https://github.com/EltonFaust/cordova-plugin-multi-player/issues</issue>
 
-	<js-module src="www/radio.js" name="RADIO">
-		<clobbers target="navigator.RADIO" />
+	<js-module src="www/multiPlayer.js" name="multiPlayer">
+		<clobbers target="navigator.multiPlayer" />
 	</js-module>
 
 	<platform name="android">
 		<config-file target="res/xml/config.xml" parent="/*">
 		<feature name="RadioPlugin">
-			<param name="android-package" value="com.imsd.radio.RadioPlugin"/>
+			<param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin"/>
 			<param name="onload" value="true" />
 		</feature>
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<service android:name="com.imsd.radio.RadioPlayerService">
+			<service android:name="com.eltonfaust.multiplayer.RadioPlayerService">
 				<intent-filter>
-					<action android:name="com.imsd.radio.INTENT_PLAYPAUSE"/>
-					<action android:name="com.imsd.radio.INTENT_OPENPLAYER"/>
-					<action android:name="com.imsd.radio.INTENT_CANCEL"/>
+					<action android:name="com.eltonfaust.multiplayer.INTENT_PLAYPAUSE"/>
+					<action android:name="com.eltonfaust.multiplayer.INTENT_OPENPLAYER"/>
+					<action android:name="com.eltonfaust.multiplayer.INTENT_CANCEL"/>
 				</intent-filter>
 			</service>
 		</config-file>
@@ -50,14 +50,14 @@
 		<source-file src="src/android/res/values/style.xml" target-dir="res/values/" />
 		<source-file src="src/android/res/values/dimens.xml" target-dir="res/values/" />
 
-		<source-file src="src/android/radio/FakeR.java" target-dir="src/com/imsd/radio/" />
-		<source-file src="src/android/radio/IRadioManager.java" target-dir="src/com/imsd/radio/" />
-		<source-file src="src/android/radio/RadioListener.java" target-dir="src/com/imsd/radio/" />
-		<source-file src="src/android/radio/RadioManager.java" target-dir="src/com/imsd/radio/" />
-		<source-file src="src/android/radio/RadioPlayerService.java" target-dir="src/com/imsd/radio/" />
-		<source-file src="src/android/radio/StreamLinkDecoder.java" target-dir="src/com/imsd/radio/" />
+		<source-file src="src/android/radio/FakeR.java" target-dir="src/com/eltonfaust/multiplayer/" />
+		<source-file src="src/android/radio/IRadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
+		<source-file src="src/android/radio/RadioListener.java" target-dir="src/com/eltonfaust/multiplayer/" />
+		<source-file src="src/android/radio/RadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
+		<source-file src="src/android/radio/RadioPlayerService.java" target-dir="src/com/eltonfaust/multiplayer/" />
+		<source-file src="src/android/radio/StreamLinkDecoder.java" target-dir="src/com/eltonfaust/multiplayer/" />
 
-		<source-file src="src/android/RadioPlugin.java" target-dir="src/com/imsd/radio/" />
+		<source-file src="src/android/RadioPlugin.java" target-dir="src/com/eltonfaust/multiplayer/" />
 
 		<source-file src="src/android/libs/armeabi/libaacdecoder.so" target-dir="libs/armeabi" />
 		<source-file src="src/android/libs/armeabi-v7a/libaacdecoder.so" target-dir="libs/armeabi-v7a" />

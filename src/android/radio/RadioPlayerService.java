@@ -1,7 +1,5 @@
-package com.imsd.radio;
+package com.eltonfaust.multiplayer;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -23,37 +21,13 @@ import com.spoledge.aacdecoder.PlayerCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-//import co.mobiwise.library.R;
-
 
 /**
  * Created by mertsimsek on 01/07/15.
  */
 public class RadioPlayerService extends Service implements PlayerCallback {
 
-    private FakeR fakeR;
-    /**
-     * Notification action intent strings
-     */
-    private static final String NOTIFICATION_INTENT_PLAY_PAUSE = "com.imsd.radio.INTENT_PLAYPAUSE";
-
-    private static final String NOTIFICATION_INTENT_CANCEL = "com.imsd.radio.INTENT_CANCEL";
-
-    private static final String NOTIFICATION_INTENT_OPEN_PLAYER = "com.imsd.radio.INTENT_OPENPLAYER";
-
-    /**
-     * Notification current values
-     */
-    private String singerName = "";
-    private String songName = "";
-    private int smallImage;
-    private Bitmap artImage;
     private int volume = 100;
-
-    /**
-     * Notification ID
-     */
-    private static final int NOTIFICATION_ID = 001;
 
     /**
      * Logging control variable
@@ -123,12 +97,6 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     private boolean isSwitching;
 
     /**
-     * If closed from notification, it will be checked
-     * on Stop method and notification will not be created
-     */
-    private boolean isClosedFromNotification = false;
-
-    /**
      * Incoming calls interrupt radio if it is playing.
      * Check if this is true or not after hang up;
      */
@@ -141,11 +109,6 @@ public class RadioPlayerService extends Service implements PlayerCallback {
      * @onRadioStarted and @onRadioStopped methods will be release lock.
      */
     private boolean mLock;
-
-    /**
-     * Notification manager
-     */
-    private NotificationManager mNotificationManager;
 
     /**
      * Binder
@@ -176,45 +139,12 @@ public class RadioPlayerService extends Service implements PlayerCallback {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        String action = intent.getAction();
-
-        /**
-         * If cancel clicked on notification, then set state to
-         * IDLE, stop player and cancel notification
-         */
-        if (action.equals(NOTIFICATION_INTENT_CANCEL)) {
-            if (isPlaying()) {
-                isClosedFromNotification = true;
-                stop();
-            }
-
-            if (mNotificationManager != null) {
-                mNotificationManager.cancel(NOTIFICATION_ID);
-            }
-        }
-        /**
-         * If play/pause action clicked on notification,
-         * Check player state and stop/play streaming.
-         */
-        else if (action.equals(NOTIFICATION_INTENT_PLAY_PAUSE)) {
-            if (isPlaying()) {
-                stop();
-            } else if (mRadioUrl != null) {
-                play(mRadioUrl);
-            }
-
-        }
-
         return START_NOT_STICKY;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        fakeR = new FakeR(this);
-        smallImage = fakeR.getId("drawable", "icon");
-
         mListenerList = new ArrayList<RadioListener>();
 
         mRadioState = State.IDLE;
@@ -224,7 +154,6 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         getPlayer();
 
         mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         if (mTelephonyManager != null) {
             mTelephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
@@ -235,22 +164,8 @@ public class RadioPlayerService extends Service implements PlayerCallback {
      * Play url if different from previous streaming url.
      *
      * @param mRadioUrl
-     * @param singerName
-     * @param songName
-     */
-    public void play(String mRadioUrl, String singerName, String songName) {
-        this.singerName = singerName;
-        this.songName = songName;
-        this.play(mRadioUrl);
-    }
-
-    /**
-     * Play url if different from previous streaming url.
-     *
-     * @param mRadioUrl
      */
     public void play(String mRadioUrl) {
-
         sendBroadcast(new Intent(ACTION_MEDIAPLAYER_STOP));
 
         notifyRadioLoading();
@@ -301,7 +216,6 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     @Override
     public void playerStarted() {
         mRadioState = State.PLAYING;
-        buildNotification();
         mLock = false;
         notifyRadioStarted();
 
@@ -329,24 +243,10 @@ public class RadioPlayerService extends Service implements PlayerCallback {
 
     @Override
     public void playerStopped(int i) {
-
         mRadioState = State.STOPPED;
-
-        /**
-         * If player stopped from notification then dont
-         * call buildNotification().
-         */
-         log("Player stopped. isClosedFromNotification : " + isClosedFromNotification);
-        notifyRadioStopped(isClosedFromNotification);
-
-        if (!isClosedFromNotification) {
-            buildNotification();
-        } else {
-            isClosedFromNotification = false;
-        }
+        notifyRadioStopped();
 
         mLock = false;
-        mNotificationManager.cancel(NOTIFICATION_ID);
         log("Player stopped. State : " + mRadioState);
 
         if (isSwitching) {
@@ -388,9 +288,9 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         }
     }
 
-    private void notifyRadioStopped(boolean closedFromNotification) {
+    private void notifyRadioStopped() {
         for (RadioListener mRadioListener : mListenerList) {
-            mRadioListener.onRadioStopped(closedFromNotification);
+            mRadioListener.onRadioStopped();
         }
     }
 
@@ -530,99 +430,5 @@ public class RadioPlayerService extends Service implements PlayerCallback {
                 play(s);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    /**
-     * Build notification
-     */
-    private void buildNotification() {
-
-        /**
-         * Intents
-         */
-        Intent intentPlayPause = new Intent(NOTIFICATION_INTENT_PLAY_PAUSE);
-        Intent intentOpenPlayer = new Intent(NOTIFICATION_INTENT_OPEN_PLAYER);
-        Intent intentCancel = new Intent(NOTIFICATION_INTENT_CANCEL);
-
-        /**
-         * Pending intents
-         */
-        PendingIntent playPausePending = PendingIntent.getService(this, 0, intentPlayPause, 0);
-        PendingIntent openPending = PendingIntent.getService(this, 0, intentOpenPlayer, 0);
-        PendingIntent cancelPending = PendingIntent.getService(this, 0, intentCancel, 0);
-
-        /**
-         * Remote view for normal view
-         */
-
-        RemoteViews mNotificationTemplate = new RemoteViews(this.getPackageName(), fakeR.getId("layout", "notification"));
-        Notification.Builder notificationBuilder = new Notification.Builder(this);
-
-        /**
-         * set small notification texts and image
-         */
-        if (artImage == null) {
-            artImage = BitmapFactory.decodeResource(getResources(), fakeR.getId("drawable", "default_art"));
-        }
-
-        mNotificationTemplate.setTextViewText(fakeR.getId("id", "notification_line_one"), singerName);
-        mNotificationTemplate.setTextViewText(fakeR.getId("id", "notification_line_two"), songName);
-        mNotificationTemplate.setImageViewResource(fakeR.getId("id", "notification_play"), isPlaying() ? fakeR.getId("drawable", "btn_playback_pause") : fakeR.getId("drawable", "btn_playback_play"));
-        mNotificationTemplate.setImageViewBitmap(fakeR.getId("id", "notification_image"), artImage);
-
-        /**
-         * OnClickPending intent for collapsed notification
-         */
-        mNotificationTemplate.setOnClickPendingIntent(fakeR.getId("id", "notification_collapse"), cancelPending);
-        mNotificationTemplate.setOnClickPendingIntent(fakeR.getId("id", "notification_play"), playPausePending);
-
-        /**
-         * Create notification instance
-         */
-        Notification notification = notificationBuilder
-                .setSmallIcon(smallImage)
-                .setContentIntent(openPending)
-                .setPriority(Notification.PRIORITY_DEFAULT)
-                .setContent(mNotificationTemplate)
-                .setUsesChronometer(true)
-                .build();
-        notification.flags = Notification.FLAG_ONGOING_EVENT;
-
-        /**
-         * Expanded notification
-         */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            RemoteViews mExpandedView = new RemoteViews(this.getPackageName(), fakeR.getId("layout", "notification_expanded"));
-
-            mExpandedView.setTextViewText(fakeR.getId("id", "notification_line_one"), singerName);
-            mExpandedView.setTextViewText(fakeR.getId("id", "notification_line_two"), songName);
-            mExpandedView.setImageViewResource(fakeR.getId("id", "notification_expanded_play"), isPlaying() ? fakeR.getId("drawable", "btn_playback_pause") : fakeR.getId("drawable", "btn_playback_play"));
-                    mExpandedView.setImageViewBitmap(fakeR.getId("id", "notification_image"), artImage);
-
-                            mExpandedView.setOnClickPendingIntent(fakeR.getId("id", "notification_collapse"), cancelPending);
-                                    mExpandedView.setOnClickPendingIntent(fakeR.getId("id", "notification_expanded_play"), playPausePending);
-
-                                            notification.bigContentView = mExpandedView;
-        }
-
-        if (mNotificationManager != null) {
-            mNotificationManager.notify(NOTIFICATION_ID, notification);
-        }
-    }
-
-    public void updateNotification(String singerName, String songName, int smallImage, int artImage) {
-        this.singerName = singerName;
-        this.songName = songName;
-        this.smallImage = smallImage;
-        this.artImage = BitmapFactory.decodeResource(getResources(), artImage);
-        buildNotification();
-    }
-
-    public void updateNotification(String singerName, String songName, int smallImage, Bitmap artImage) {
-        this.singerName = singerName;
-        this.songName = songName;
-        this.smallImage = smallImage;
-        this.artImage = artImage;
-        buildNotification();
     }
 }

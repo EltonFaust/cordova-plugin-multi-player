@@ -1,4 +1,4 @@
-package com.imsd.radio;
+package com.eltonfaust.multiplayer;
 
 import android.os.AsyncTask;
 
@@ -62,9 +62,10 @@ public class StreamLinkDecoder extends AsyncTask<Void, Void, String> {
             e.printStackTrace();
         }
 
-
-        if (response == null)
+        if (response == null) {
             return "";
+        }
+
         return response.toString();
     }
 

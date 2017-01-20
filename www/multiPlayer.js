@@ -1,5 +1,5 @@
-cordova.define("cordova-plugin-multi-player.RADIO", function(require, exports, module) {
-    var RADIO = {
+cordova.define("cordova-plugin-multi-player.multiPlayer", function(require, exports, module) {
+    var multiPlayer = {
         initialize: function(successCallback, failureCallback) {
             cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', [ ]);
         },
@@ -18,5 +18,5 @@ cordova.define("cordova-plugin-multi-player.RADIO", function(require, exports, m
 
     };
 
-    module.exports = RADIO;
+    module.exports = multiPlayer;
 });

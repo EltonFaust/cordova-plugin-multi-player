@@ -1,4 +1,4 @@
-package com.imsd.radio;
+package com.eltonfaust.multiplayer;
 
 
 // rm -fr MyApp; cordova create MyApp; cd MyApp;  cordova platform add android; cordova plugin add ../cordova-plugin/;
@@ -52,7 +52,7 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
 		// 	pluginResult.setKeepCallback(true);
 
 		} else if ("play".equals(action)) {
-			mRadioManager.startRadio(args.getString(0), args.getString(1), args.getString(2));
+			mRadioManager.startRadio(args.getString(0));
 			callbackContext.success();
 			return true;
 		} else if ("stop".equals(action)) {
@@ -100,26 +100,15 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
 	}
 
 	@Override
-	public void onRadioStopped(boolean closedFromNotification) {
+	public void onRadioStopped() {
 		Log.e(LOG_TAG, "RADIO STATE : STOPPED...");
 
 		if (this.connectionCallbackContext != null) {
-			//PluginResult result = new PluginResult(PluginResult.Status.OK, data);
-			//result.setKeepCallback(false);
-			//this.success(result, this.myCallbackId);
 			PluginResult pluginResult = null;
+			pluginResult = new PluginResult(PluginResult.Status.OK, "STOPPED");
 
-			if (closedFromNotification) {
-				pluginResult = new PluginResult(PluginResult.Status.OK, "STOPPED-FROM-NOTIFICATION");
-			} else {
-				pluginResult = new PluginResult(PluginResult.Status.OK, "STOPPED");
-			}
-
-			//pluginResult.setKeepCallback(false);
 			pluginResult.setKeepCallback(true);
 			this.connectionCallbackContext.sendPluginResult(pluginResult);
-			//this.connectionCallbackContext = null;
-			//this.success(result, this.myCallbackId);
 		}
 	}
 

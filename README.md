@@ -34,8 +34,6 @@ onDeviceReady: function() {
     console.log('SUCCESS navigator.RADIO.initialize');
     if (s == 'STARTED') {
       // the reproduction was successfully started
-    } else if (s == 'STOPPED-FROM-NOTIFICATION') {
-      // the reproduction was stopped from the notification
     } else if (s == 'STOPPED') {
       // the reproduction was stopped other than the notification
     }
