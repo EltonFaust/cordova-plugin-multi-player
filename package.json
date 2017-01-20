@@ -1,28 +1,28 @@
 {
-  "name": "cordova-plugin-streaming",
-  "version": "1.4.0",
-  "description": "Streaming Plugin",
-  "cordova": {
-    "id": "cordova-plugin-streaming",
-    "platforms": [
-      "android"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mradosta/cordova-plugin-streaming.git"
-  },
-  "keywords": [
-    "streaming",
-    "radio",
-    "libaacdecoder",
-    "ecosystem:cordova",
-    "cordova-android"
-  ],
-  "author": "Martin Radosta",
-  "license": "Apache 2.0",
-  "bugs": {
-    "url": "https://github.com/mradosta/cordova-plugin-streaming/issues"
-  },
-  "homepage": "https://github.com/mradosta/cordova-plugin-streaming#readme"
+	"name": "cordova-plugin-multi-player",
+	"version": "1.4.0",
+	"description": "Streaming Plugin",
+	"cordova": {
+		"id": "cordova-plugin-multi-player",
+		"platforms": [
+			"android"
+		]
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/EltonFaust/cordova-plugin-multi-player.git"
+	},
+	"keywords": [
+		"streaming",
+		"radio",
+		"libaacdecoder",
+		"ecosystem:cordova",
+		"cordova-android"
+	],
+	"author": "Martin Radosta",
+	"license": "Apache 2.0",
+	"bugs": {
+		"url": "https://github.com/EltonFaust/cordova-plugin-multi-player/issues"
+	},
+	"homepage": "https://github.com/EltonFaust/cordova-plugin-multi-player#readme"
 }
