@@ -19,10 +19,10 @@
 
 	<platform name="android">
 		<config-file target="res/xml/config.xml" parent="/*">
-		<feature name="RadioPlugin">
-			<param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin"/>
-			<param name="onload" value="true" />
-		</feature>
+			<feature name="RadioPlugin">
+				<param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin"/>
+				<param name="onload" value="true" />
+			</feature>
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -36,9 +36,9 @@
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/*">
-		<uses-permission android:name="android.permission.INTERNET" />
-		<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-		<uses-permission android:name="android.permission.WAKE_LOCK" />
+			<uses-permission android:name="android.permission.INTERNET" />
+			<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+			<uses-permission android:name="android.permission.WAKE_LOCK" />
 		</config-file>
 
 		<source-file src="src/android/res/drawable/btn_notification_collapse.png" target-dir="res/drawable/" />

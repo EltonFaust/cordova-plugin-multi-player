@@ -1,9 +1,7 @@
 # cordova-plugin-multi-player
 
 This plugin provides an implementation of an Android service library which uses AAC Player. Ready to use Streaming Player Service. (Background Player Service).
-
-Based in [RadioPlayerService](https://github.com/iammert/RadioPlayerService) is the solution for long time Android HTML5 Audio implementation takes before playing a streaming.
-
+This plugin is based on [cordova-plugin-streaming](https://github.com/mradosta/cordova-plugin-streaming) with a few ajusts.
 
 ## Supported Platforms
 
@@ -22,7 +20,7 @@ Based in [RadioPlayerService](https://github.com/iammert/RadioPlayerService) is 
 
 ## Installation
 
-    cordova plugin add cordova-plugin-multi-player
+    cordova plugin add https://github.com/EltonFaust/cordova-plugin-multi-player.git
 
 
 ### Quick Example
@@ -30,15 +28,15 @@ Based in [RadioPlayerService](https://github.com/iammert/RadioPlayerService) is 
 ...
 onDeviceReady: function() {
 
-  navigator.RADIO.initialize(function(s) {
-    console.log('SUCCESS navigator.RADIO.initialize');
+  navigator.multiPlayer.initialize(function(s) {
+    console.log('SUCCESS navigator.multiPlayer.initialize');
     if (s == 'STARTED') {
       // the reproduction was successfully started
     } else if (s == 'STOPPED') {
       // the reproduction was stopped other than the notification
     }
   }, function(s) {
-    console.log('ERROR navigator.RADIO.initialize');
+    console.log('ERROR navigator.multiPlayer.initialize');
   });
 
 }
@@ -46,25 +44,25 @@ onDeviceReady: function() {
 
 
 var url = 'http://hayatmix.net/;yayin.mp3.m3u';
-navigator.RADIO.play(function(s) {
-  console.log('SUCCESS navigator.RADIO.play');
+navigator.multiPlayer.play(function(s) {
+  console.log('SUCCESS navigator.multiPlayer.play');
 }, function(s) {
-  console.log('ERROR navigator.RADIO.play');
+  console.log('ERROR navigator.multiPlayer.play');
 }, url, 'My Stream Title', 'My Stream Subtitle');
 
 
-navigator.RADIO.stop(function(s) {
-  console.log('SUCCESS navigator.RADIO.stop');
+navigator.multiPlayer.stop(function(s) {
+  console.log('SUCCESS navigator.multiPlayer.stop');
 }, function(s) {
-  console.log('ERROR navigator.RADIO.stop');
+  console.log('ERROR navigator.multiPlayer.stop');
 });
 
 
 var volume = 50; // volume between 0 (silent) and 100
-navigator.RADIO.setVolume(function(s) {
-  console.log('SUCCESS navigator.RADIO.setVolume');
+navigator.multiPlayer.setVolume(function(s) {
+  console.log('SUCCESS navigator.multiPlayer.setVolume');
 }, function(s) {
-  console.log('ERROR navigator.RADIO.setVolume');
+  console.log('ERROR navigator.multiPlayer.setVolume');
 }, volume);
 ```
 
@@ -72,11 +70,6 @@ navigator.RADIO.setVolume(function(s) {
 ## Libraries Used ##
 
 [AAC Decoder Library](https://github.com/vbartacek/aacdecoder-android)
-
-
-
-### Special thanks
-Gonzalo Martinez for his great and continuos contributions
 
 
 
