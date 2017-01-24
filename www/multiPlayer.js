@@ -1,22 +1,20 @@
-cordova.define("cordova-plugin-multi-player.multiPlayer", function(require, exports, module) {
-    var multiPlayer = {
-        initialize: function(successCallback, failureCallback) {
-            cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', [ ]);
-        },
+var multiPlayer = {
+    initialize: function(successCallback, failureCallback) {
+        cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', [ ]);
+    },
 
-        play: function(successCallback, failureCallback, url, singerName, songName) {
-            cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'play', [ url, singerName, songName ]);
-        },
+    play: function(successCallback, failureCallback, url, singerName, songName) {
+        cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'play', [ url, singerName, songName ]);
+    },
 
-        stop: function(successCallback, failureCallback) {
-            cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'stop', [ ]);
-        },
+    stop: function(successCallback, failureCallback) {
+        cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'stop', [ ]);
+    },
 
-        setVolume: function(successCallback, failureCallback, volume) {
-            cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'setvolume', [ volume ]);
-        },
+    setVolume: function(successCallback, failureCallback, volume) {
+        cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'setvolume', [ volume ]);
+    },
 
-    };
+};
 
-    module.exports = multiPlayer;
-});
+module.exports = multiPlayer;
