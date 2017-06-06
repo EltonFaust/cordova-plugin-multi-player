@@ -1,6 +1,6 @@
 {
 	"name": "cordova-plugin-multi-player",
-	"version": "1.4.0",
+	"version": "1.0.1",
 	"description": "Streaming Plugin",
 	"cordova": {
 		"id": "cordova-plugin-multi-player",
@@ -19,7 +19,7 @@
 		"ecosystem:cordova",
 		"cordova-android"
 	],
-	"author": "Martin Radosta",
+	"author": "Elton Faust",
 	"license": "Apache 2.0",
 	"bugs": {
 		"url": "https://github.com/EltonFaust/cordova-plugin-multi-player/issues"

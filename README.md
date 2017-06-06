@@ -27,42 +27,47 @@ This plugin is based on [cordova-plugin-streaming](https://github.com/mradosta/c
 ```js
 ...
 onDeviceReady: function() {
-
-  navigator.multiPlayer.initialize(function(s) {
-    console.log('SUCCESS navigator.multiPlayer.initialize');
-    if (s == 'STARTED') {
-      // the reproduction was successfully started
-    } else if (s == 'STOPPED') {
-      // the reproduction was stopped other than the notification
-    }
-  }, function(s) {
-    console.log('ERROR navigator.multiPlayer.initialize');
-  });
-
+    navigator.multiPlayer.initialize(function(s) {
+        console.log('SUCCESS navigator.multiPlayer.initialize');
+        if (s == 'STARTED') {
+            // the reproduction was successfully started
+        } else if (s == 'STOPPED') {
+            // the reproduction was stopped other than the notification
+        }
+    }, function(s) {
+        console.log('ERROR navigator.multiPlayer.initialize');
+    });
 }
 ...
 
 
+// volume and streamType parameters are not required
+
 var url = 'http://hayatmix.net/;yayin.mp3.m3u';
+// volume between 0 (silent) and 100 (default: 100)
+var volume = 50; 
+// valid constants are 'STREAM_MUSIC' and 'STREAM_ALARM' (default: STREAM_MUSIC)
+var streamType = navigator.multiPlayer.STREAM_ALARM;
+
 navigator.multiPlayer.play(function(s) {
-  console.log('SUCCESS navigator.multiPlayer.play');
+    console.log('SUCCESS navigator.multiPlayer.play');
 }, function(s) {
-  console.log('ERROR navigator.multiPlayer.play');
-}, url, 'My Stream Title', 'My Stream Subtitle');
+    console.log('ERROR navigator.multiPlayer.play');
+}, url, volume, streamType);
 
 
 navigator.multiPlayer.stop(function(s) {
-  console.log('SUCCESS navigator.multiPlayer.stop');
+    console.log('SUCCESS navigator.multiPlayer.stop');
 }, function(s) {
-  console.log('ERROR navigator.multiPlayer.stop');
+    console.log('ERROR navigator.multiPlayer.stop');
 });
 
 
 var volume = 50; // volume between 0 (silent) and 100
 navigator.multiPlayer.setVolume(function(s) {
-  console.log('SUCCESS navigator.multiPlayer.setVolume');
+    console.log('SUCCESS navigator.multiPlayer.setVolume');
 }, function(s) {
-  console.log('ERROR navigator.multiPlayer.setVolume');
+    console.log('ERROR navigator.multiPlayer.setVolume');
 }, volume);
 ```
 

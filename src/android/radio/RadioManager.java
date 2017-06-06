@@ -79,7 +79,17 @@ public class RadioManager implements IRadioManager {
 
     @Override
     public void startRadio(String streamURL) {
-        mService.play(streamURL);
+        mService.play(streamURL, 100);
+    }
+
+    @Override
+    public void startRadio(String streamURL, int volume) {
+        mService.play(streamURL, volume);
+    }
+
+    @Override
+    public void startRadio(String streamURL, int volume, int streamType) {
+        mService.play(streamURL, volume, streamType);
     }
 
     /**

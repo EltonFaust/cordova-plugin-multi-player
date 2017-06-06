@@ -28,6 +28,7 @@ import java.util.List;
 public class RadioPlayerService extends Service implements PlayerCallback {
 
     private int volume = 100;
+    private int streamType = -1;
 
     /**
      * Logging control variable
@@ -165,10 +166,13 @@ public class RadioPlayerService extends Service implements PlayerCallback {
      *
      * @param mRadioUrl
      */
-    public void play(String mRadioUrl) {
+    public void play(String mRadioUrl, int volume, int streamType) {
         sendBroadcast(new Intent(ACTION_MEDIAPLAYER_STOP));
 
         notifyRadioLoading();
+
+        this.volume = this.parseVolume(volume);
+        this.streamType = streamType;
 
         if (checkSuffix(mRadioUrl)) {
             decodeStremLink(mRadioUrl);
@@ -188,6 +192,14 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         }
     }
 
+    public void play(String mRadioUrl, int volume) {
+        this.play(mRadioUrl, volume, -1);
+    }
+
+    public void play(String mRadioUrl) {
+        this.play(mRadioUrl, 100, -1);
+    }
+
     public void stop() {
         if (!mLock && mRadioState != State.STOPPED) {
             log("Stop requested.");
@@ -197,13 +209,7 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     }
 
     public void setVolume(int volume) {
-        if (volume < 0) {
-            volume = 0;
-        } else if (volume > 100) {
-            volume = 100;
-        }
-
-        this.volume = volume;
+        this.volume = this.parseVolume(volume);
         this.updateTrackVolume();
     }
 
@@ -338,6 +344,7 @@ public class RadioPlayerService extends Service implements PlayerCallback {
             mRadioPlayer = new MultiPlayer(this, AUDIO_BUFFER_CAPACITY_MS, AUDIO_DECODE_CAPACITY_MS);
             mRadioPlayer.setResponseCodeCheckEnabled(false);
             mRadioPlayer.setPlayerCallback(this);
+            mRadioPlayer.setStreamType(this.streamType);
         }
 
         return mRadioPlayer;
@@ -430,5 +437,15 @@ public class RadioPlayerService extends Service implements PlayerCallback {
                 play(s);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private int parseVolume(int volume) {
+        if (volume > 100) {
+            return 100;
+        } else if(volume < 0) {
+            return 0;
+        }
+
+        return volume;
     }
 }
