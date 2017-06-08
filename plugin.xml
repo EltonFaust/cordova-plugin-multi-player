@@ -59,10 +59,22 @@
 
 		<source-file src="src/android/RadioPlugin.java" target-dir="src/com/eltonfaust/multiplayer/" />
 
+		<source-file src="src/android/libs/aacdecoder/AACPlayer.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/BufferReader.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/Decoder.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/FlashAACInputStream.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/FlashAACPlayer.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/IcyInputStream.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/IcyURLConnection.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/IcyURLStreamHandler.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/MP3Player.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/MultiPlayer.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/PCMFeed.java" target-dir="src/com/spoledge/aacdecoder/" />
+		<source-file src="src/android/libs/aacdecoder/PlayerCallback.java" target-dir="src/com/spoledge/aacdecoder/" />
+
 		<source-file src="src/android/libs/armeabi/libaacdecoder.so" target-dir="libs/armeabi" />
 		<source-file src="src/android/libs/armeabi-v7a/libaacdecoder.so" target-dir="libs/armeabi-v7a" />
 		<source-file src="src/android/libs/mips/libaacdecoder.so" target-dir="libs/mips" />
 		<source-file src="src/android/libs/x86/libaacdecoder.so" target-dir="libs/x86" />
-		<source-file src="src/android/libs/libaacdecoder.jar" target-dir="libs" />
 	</platform>
 </plugin>

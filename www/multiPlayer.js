@@ -20,7 +20,7 @@ multiPlayer.prototype.stop = function(successCallback, failureCallback) {
     cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'stop', []);
 };
 
-multiPlayer.prototype.setVolume = setVolume: function(successCallback, failureCallback, volume) {
+multiPlayer.prototype.setVolume = function(successCallback, failureCallback, volume) {
     cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'setvolume', [volume]);
 };
 
@@ -28,4 +28,4 @@ multiPlayer.prototype.setVolume = setVolume: function(successCallback, failureCa
 multiPlayer.STREAM_MUSIC = 3;
 multiPlayer.STREAM_ALARM = 4;
 
-module.exports = multiPlayer;
+module.exports = new multiPlayer();

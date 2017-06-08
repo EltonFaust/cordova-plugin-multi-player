@@ -20,7 +20,7 @@ This plugin is based on [cordova-plugin-streaming](https://github.com/mradosta/c
 
 ## Installation
 
-    cordova plugin add https://github.com/EltonFaust/cordova-plugin-multi-player.git
+    cordova plugin add cordova-plugin-multi-player
 
 
 ### Quick Example
@@ -41,14 +41,13 @@ onDeviceReady: function() {
 ...
 
 
-// volume and streamType parameters are not required
-
 var url = 'http://hayatmix.net/;yayin.mp3.m3u';
 // volume between 0 (silent) and 100 (default: 100)
 var volume = 50; 
 // valid constants are 'STREAM_MUSIC' and 'STREAM_ALARM' (default: STREAM_MUSIC)
 var streamType = navigator.multiPlayer.STREAM_ALARM;
 
+// volume and streamType parameters are not required
 navigator.multiPlayer.play(function(s) {
     console.log('SUCCESS navigator.multiPlayer.play');
 }, function(s) {
@@ -71,6 +70,9 @@ navigator.multiPlayer.setVolume(function(s) {
 }, volume);
 ```
 
+## Log Debug
+
+    adb logcat -s "LOG" -s "RadioPlugin" -s "RadioManager" -s "AACPlayer" -s "BufferReader" -s "FlashAACInputStream" -s "IcyInputStream" -s "MP3Player" -s "MultiPlayer" -s "PCMFeed"
 
 ## Libraries Used ##
 
