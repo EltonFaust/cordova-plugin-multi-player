@@ -171,7 +171,10 @@ public class RadioPlayerService extends Service implements PlayerCallback {
 
         notifyRadioLoading();
 
-        this.volume = this.parseVolume(volume);
+        if (volume != -1) {
+            this.volume = this.parseVolume(volume);
+        }
+
         this.streamType = streamType;
 
         if (checkSuffix(mRadioUrl)) {
@@ -193,11 +196,11 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     }
 
     public void play(String mRadioUrl, int volume) {
-        this.play(mRadioUrl, volume, -1);
+        this.play(mRadioUrl, volume, this.streamType);
     }
 
     public void play(String mRadioUrl) {
-        this.play(mRadioUrl, 100, -1);
+        this.play(mRadioUrl, -1, this.streamType);
     }
 
     public void stop() {
@@ -223,15 +226,14 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     public void playerStarted() {
         mRadioState = State.PLAYING;
         mLock = false;
-        notifyRadioStarted();
 
-        log("Player started. tate : " + mRadioState);
+        log("Player started. State : " + mRadioState);
 
         if (isInterrupted) {
             isInterrupted = false;
+        } else {
+            notifyRadioStarted();
         }
-
-        // this.updateTrackVolume();
     }
 
     public boolean isPlaying() {
@@ -250,19 +252,25 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     @Override
     public void playerStopped(int i) {
         mRadioState = State.STOPPED;
-        notifyRadioStopped();
-
         mLock = false;
+
         log("Player stopped. State : " + mRadioState);
 
         if (isSwitching) {
             play(mRadioUrl);
+        } else {
+            if (isInterrupted) {
+                isInterrupted = false;
+            } else {
+                notifyRadioStopped();
+            }
         }
     }
 
     @Override
     public void playerException(Throwable throwable) {
         mLock = false;
+        isInterrupted = false;
         mRadioPlayer = null;
         getPlayer();
         notifyErrorOccured();
@@ -369,7 +377,6 @@ public class RadioPlayerService extends Service implements PlayerCallback {
                     play(mRadioUrl);
                 }
             } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-
                 /**
                  * Stop radio and set interrupted if it is playing on outgoing call.
                  */
@@ -377,7 +384,6 @@ public class RadioPlayerService extends Service implements PlayerCallback {
                     isInterrupted = true;
                     stop();
                 }
-
             }
 
             super.onCallStateChanged(state, incomingNumber);

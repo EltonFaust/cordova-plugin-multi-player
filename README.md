@@ -6,6 +6,7 @@ This plugin is based on [cordova-plugin-streaming](https://github.com/mradosta/c
 ## Supported Platforms
 
 - Android
+- iOS
 
 
 ## Supported URLs

@@ -4,7 +4,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:rim="http://www.blackberry.com/ns/widgets"
 	id="cordova-plugin-multi-player"
-	version="1.0.1">
+	version="1.0.3">
 
 	<name>Multi Player Plugin</name>
 	<description>Multi Player Plugin</description>
@@ -77,4 +77,17 @@
 		<source-file src="src/android/libs/mips/libaacdecoder.so" target-dir="libs/mips" />
 		<source-file src="src/android/libs/x86/libaacdecoder.so" target-dir="libs/x86" />
 	</platform>
+    <platform name="ios">
+		<config-file target="*-Info.plist" parent="UIBackgroundModes">
+			<array>
+	        	<string>audio</string>
+			</array>
+		</config-file>
+        <config-file paSrent="/*" target="config.xml">
+            <feature name="MultiPlayer">
+                <param name="ios-package" value="MultiPlayer" />
+            </feature>
+        </config-file>
+        <source-file src="src/ios/MultiPlayer.m" />
+    </platform>
 </plugin>

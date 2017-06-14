@@ -1,11 +1,11 @@
 {
 	"name": "cordova-plugin-multi-player",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"description": "Streaming Plugin",
 	"cordova": {
 		"id": "cordova-plugin-multi-player",
 		"platforms": [
-			"android"
+			"android", "ios"
 		]
 	},
 	"repository": {
@@ -17,7 +17,9 @@
 		"radio",
 		"libaacdecoder",
 		"ecosystem:cordova",
-		"cordova-android"
+		"cordova",
+		"android",
+		"ios"
 	],
 	"author": "Elton Faust",
 	"license": "Apache 2.0",

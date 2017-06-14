@@ -36,10 +36,11 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
 				mRadioManager.connect();
 
 				this.connectionCallbackContext = callbackContext;
+
 				PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
 				pluginResult.setKeepCallback(true);
 
-				//callbackContext.success();
+				callbackContext.sendPluginResult(pluginResult);
 				return true;
 			} catch (Exception e) {
 				Log.e(LOG_TAG, "Exception occurred: ".concat(e.getMessage()));

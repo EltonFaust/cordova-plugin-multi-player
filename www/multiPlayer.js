@@ -6,7 +6,7 @@ multiPlayer.prototype.initialize = function(successCallback, failureCallback) {
 
 multiPlayer.prototype.play = function(successCallback, failureCallback, url, volume, streamType) {
     if (typeof volume == "undefined") {
-        volume = 100;
+        volume = -1;
     }
 
     if (typeof streamType == "undefined") {
