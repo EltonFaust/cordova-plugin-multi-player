@@ -72,7 +72,7 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 
     if (stopping) {
-        [self mp_sendStoppedResult];
+        [self mp_sendListenerResult:@"STOPPED"];
     }
 }
 
@@ -94,19 +94,17 @@
         if (self.streamPlayer.status == AVPlayerStatusFailed) {
             // Some error occoured
             NSLog(@"AVPlayer Failed");
-            [self mp_sendStoppedResult];
+            [self mp_sendListenerResult:@"ERROR"];
         } else if (self.streamPlayer.status == AVPlayerStatusReadyToPlay) {
             // 
             NSLog(@"AVPlayerStatusReadyToPlay");
             self.streamPlayer.volume = self.volume / 100.00;
             [self.streamPlayer play];
 
-            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"STARTED"];
-            [pluginResult setKeepCallbackAsBool:YES];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+            [self mp_sendListenerResult:@"STARTED"];
         } else if (self.streamPlayer.status == AVPlayerItemStatusUnknown) {
             NSLog(@"AVPlayer Unknown");
-            // [self mp_sendStoppedResult];
+            // [self mp_sendListenerResult:@"STOPPED"];
         }
     }
 }
@@ -129,11 +127,13 @@
     }
 }
 
-- (void)mp_sendStoppedResult
+- (void)mp_sendListenerResult:(NSString *)status
 {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"STOPPED"];
-    [pluginResult setKeepCallbackAsBool:YES];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+    if (self.callbackId != nil) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:status];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+    }
 }
 
 @end

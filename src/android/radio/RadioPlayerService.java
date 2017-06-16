@@ -27,9 +27,6 @@ import java.util.List;
  */
 public class RadioPlayerService extends Service implements PlayerCallback {
 
-    private int volume = 100;
-    private int streamType = -1;
-
     /**
      * Logging control variable
      */
@@ -68,6 +65,16 @@ public class RadioPlayerService extends Service implements PlayerCallback {
      * Current radio URL
      */
     private String mRadioUrl;
+
+    /**
+     * Current radio Volume
+     */
+    private int mRadioVolume = 100;
+
+    /**
+     * Current radio Stream Type
+     */
+    private int mRadioStreamType = -1;
 
     /**
      * Stop action. If another mediaplayer will start.It needs
@@ -172,38 +179,47 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         notifyRadioLoading();
 
         if (volume != -1) {
-            this.volume = this.parseVolume(volume);
+            this.mRadioVolume = this.parseVolume(volume);
         }
 
-        this.streamType = streamType;
+        this.mRadioStreamType = streamType;
 
         if (checkSuffix(mRadioUrl)) {
             decodeStremLink(mRadioUrl);
         } else {
             this.mRadioUrl = mRadioUrl;
             isSwitching = false;
-
-            if (isPlaying()) {
-                log("Switching Radio");
-                isSwitching = true;
-                stop();
-            } else if (!mLock) {
-                log("Play requested.");
-                mLock = true;
-                getPlayer().playAsync(mRadioUrl);
-            }
+            isInterrupted = false;
+            this.start();
         }
     }
 
     public void play(String mRadioUrl, int volume) {
-        this.play(mRadioUrl, volume, this.streamType);
+        this.play(mRadioUrl, volume, this.mRadioStreamType);
     }
 
     public void play(String mRadioUrl) {
-        this.play(mRadioUrl, -1, this.streamType);
+        this.play(mRadioUrl, -1, this.mRadioStreamType);
     }
 
     public void stop() {
+        this.isInterrupted = false;
+        this.finish();
+    }
+
+    private void start() {
+        if (isPlaying()) {
+            log("Switching Radio");
+            isSwitching = true;
+            stop();
+        } else if (!mLock) {
+            log("Play requested.");
+            mLock = true;
+            getPlayer().playAsync(this.mRadioUrl);
+        }
+    }
+
+    private void finish() {
         if (!mLock && mRadioState != State.STOPPED) {
             log("Stop requested.");
             mLock = true;
@@ -212,13 +228,13 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     }
 
     public void setVolume(int volume) {
-        this.volume = this.parseVolume(volume);
+        this.mRadioVolume = this.parseVolume(volume);
         this.updateTrackVolume();
     }
 
     private void updateTrackVolume() {
         if (this.audioTrack != null) {
-            this.audioTrack.setVolume(this.volume * 0.01f);
+            this.audioTrack.setVolume(this.mRadioVolume * 0.01f);
         }
     }
 
@@ -352,7 +368,7 @@ public class RadioPlayerService extends Service implements PlayerCallback {
             mRadioPlayer = new MultiPlayer(this, AUDIO_BUFFER_CAPACITY_MS, AUDIO_DECODE_CAPACITY_MS);
             mRadioPlayer.setResponseCodeCheckEnabled(false);
             mRadioPlayer.setPlayerCallback(this);
-            mRadioPlayer.setStreamType(this.streamType);
+            mRadioPlayer.setStreamType(this.mRadioStreamType);
         }
 
         return mRadioPlayer;
@@ -367,14 +383,14 @@ public class RadioPlayerService extends Service implements PlayerCallback {
                  */
                 if (isPlaying()) {
                     isInterrupted = true;
-                    stop();
+                    finish();
                 }
             } else if (state == TelephonyManager.CALL_STATE_IDLE) {
                 /**
                  * Keep playing if it is interrupted.
                  */
                 if (isInterrupted) {
-                    play(mRadioUrl);
+                    start();
                 }
             } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
                 /**
@@ -382,7 +398,7 @@ public class RadioPlayerService extends Service implements PlayerCallback {
                  */
                 if (isPlaying()) {
                     isInterrupted = true;
-                    stop();
+                    finish();
                 }
             }
 

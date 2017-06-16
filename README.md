@@ -33,7 +33,9 @@ onDeviceReady: function() {
         if (s == 'STARTED') {
             // the reproduction was successfully started
         } else if (s == 'STOPPED') {
-            // the reproduction was stopped other than the notification
+            // the reproduction was stopped
+        } else if (s == 'ERROR') {
+            // the reproduction raised an error
         }
     }, function(s) {
         console.log('ERROR navigator.multiPlayer.initialize');
