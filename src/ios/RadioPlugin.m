@@ -4,7 +4,7 @@
 #import <Cordova/CDVPluginResult.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface MultiPlayer : CDVPlugin
+@interface RadioPlugin : CDVPlugin
 
 @property NSString *callbackId;
 @property AVPlayer *streamPlayer;
@@ -16,7 +16,7 @@
 - (void)setvolume:(CDVInvokedUrlCommand*)command;
 @end
 
-@implementation MultiPlayer
+@implementation RadioPlugin
 
 #pragma mark Plugin methods
 
@@ -48,7 +48,7 @@
 
     NSURL *streamNSURL = [NSURL URLWithString:streamUrl];
 
-    self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL error:nil];
+    self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL];
     [self.streamPlayer addObserver:self forKeyPath:@"status" options:0 context:nil];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -63,7 +63,7 @@
 
     if (self.streamPlayer != nil) {
         [self.streamPlayer removeObserver:self forKeyPath:@"status" context:nil];
-        [self.streamPlayer stop];
+        [self.streamPlayer pause];
         self.streamPlayer = nil;
         stopping = YES;
     }

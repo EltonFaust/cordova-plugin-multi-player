@@ -4,7 +4,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:rim="http://www.blackberry.com/ns/widgets"
 	id="cordova-plugin-multi-player"
-	version="1.0.3">
+	version="1.0.4">
 
 	<name>Multi Player Plugin</name>
 	<description>Multi Player Plugin</description>
@@ -84,10 +84,10 @@
 			</array>
 		</config-file>
         <config-file paSrent="/*" target="config.xml">
-            <feature name="MultiPlayer">
-                <param name="ios-package" value="MultiPlayer" />
+            <feature name="RadioPlugin">
+                <param name="ios-package" value="RadioPlugin" />
             </feature>
         </config-file>
-        <source-file src="src/ios/MultiPlayer.m" />
+        <source-file src="src/ios/RadioPlugin.m" />
     </platform>
 </plugin>
