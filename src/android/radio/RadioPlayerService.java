@@ -368,8 +368,9 @@ public class RadioPlayerService extends Service implements PlayerCallback {
             mRadioPlayer = new MultiPlayer(this, AUDIO_BUFFER_CAPACITY_MS, AUDIO_DECODE_CAPACITY_MS);
             mRadioPlayer.setResponseCodeCheckEnabled(false);
             mRadioPlayer.setPlayerCallback(this);
-            mRadioPlayer.setStreamType(this.mRadioStreamType);
         }
+
+        mRadioPlayer.setStreamType(this.mRadioStreamType);
 
         return mRadioPlayer;
     }
