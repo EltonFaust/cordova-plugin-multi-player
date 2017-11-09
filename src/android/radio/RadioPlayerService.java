@@ -275,9 +275,7 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         if (isSwitching) {
             play(mRadioUrl);
         } else {
-            if (isInterrupted) {
-                isInterrupted = false;
-            } else {
+            if (!isInterrupted) {
                 notifyRadioStopped();
             }
         }
