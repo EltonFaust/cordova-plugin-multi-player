@@ -82,6 +82,11 @@ navigator.multiPlayer.setVolume(function(s) {
 [AAC Decoder Library](https://github.com/vbartacek/aacdecoder-android)
 
 
+## x64 decoder version from ##
+
+[Ti.AndroidStreamer](https://github.com/AppWerft/ti-android-streamer/tree/master/aacdecoderlibs)
+
+
 
 License
 --------

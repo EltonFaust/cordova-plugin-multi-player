@@ -1,7 +1,10 @@
 package com.eltonfaust.multiplayer;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -44,6 +48,15 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     private final String SUFFIX_PLS = ".pls";
     private final String SUFFIX_RAM = ".ram";
     private final String SUFFIX_WAX = ".wax";
+
+    // Fixed ID for the 'foreground' notification
+    public static final int NOTIFICATION_ID = 20190517;
+
+    // Default title of the background notification
+    private static final String NOTIFICATION_TITLE = "App is running in background";
+
+    // Default text of the background notification
+    private static final String NOTIFICATION_TEXT = "Doing heavy tasks.";
 
     /**
      * State enum for Radio Player state (IDLE, PLAYING, STOPPED, INTERRUPTED)
@@ -123,6 +136,9 @@ public class RadioPlayerService extends Service implements PlayerCallback {
      */
     public final IBinder mLocalBinder = new LocalBinder();
 
+    // Partial wake lock to prevent the app from going to sleep when locked
+    private PowerManager.WakeLock wakeLock;
+
     @Override
     public IBinder onBind(Intent intent) {
         return mLocalBinder;
@@ -161,10 +177,39 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         mLock = false;
         getPlayer();
 
-        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        mTelephonyManager = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
 
         if (mTelephonyManager != null) {
             mTelephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
+
+        // code based on plugin cordova-plugin-background-mode
+        Notification.Builder notificationBuilder = new Notification.Builder(this.getApplicationContext())
+                .setContentTitle(NOTIFICATION_TITLE)
+                .setContentText(NOTIFICATION_TEXT)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_MIN);
+
+        this.startForeground(NOTIFICATION_ID, notificationBuilder.build());
+
+        PowerManager powerMgr = (PowerManager) this.getSystemService(POWER_SERVICE);
+
+        this.wakeLock = powerMgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BackgroundMode");
+
+        this.wakeLock.acquire();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.stopForeground(true);
+
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(NOTIFICATION_ID);
+
+        if (this.wakeLock != null) {
+            this.wakeLock.release();
+            this.wakeLock = null;
         }
     }
 
