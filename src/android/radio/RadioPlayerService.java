@@ -1,6 +1,7 @@
 package com.eltonfaust.multiplayer;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -14,6 +15,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.service.notification.StatusBarNotification;
+import android.support.annotation.RequiresApi;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -24,7 +27,6 @@ import com.spoledge.aacdecoder.PlayerCallback;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Created by mertsimsek on 01/07/15.
@@ -49,7 +51,13 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     private final String SUFFIX_RAM = ".ram";
     private final String SUFFIX_WAX = ".wax";
 
-    // Fixed ID for the 'foreground' notification
+    // Music Control plugin notification id
+    public static final int MUSIC_CONTROL_NOTIFICATION = 7824;
+
+    // ID for the 'foreground' notification channel
+    public static final String NOTIFICATION_CHANNEL_ID = "cordova-plugin-multi-player-id";
+
+    // ID for the 'foreground' notification
     public static final int NOTIFICATION_ID = 20190517;
 
     // Default title of the background notification
@@ -171,26 +179,52 @@ public class RadioPlayerService extends Service implements PlayerCallback {
         super.onCreate();
         mListenerList = new ArrayList<RadioListener>();
 
-        mRadioState = State.IDLE;
-        isSwitching = false;
-        isInterrupted = false;
-        mLock = false;
-        getPlayer();
+        this.mRadioState = State.IDLE;
+        this.isSwitching = false;
+        this.isInterrupted = false;
+        this.mLock = false;
+        this.getPlayer();
 
-        mTelephonyManager = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+        this.mTelephonyManager = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
 
-        if (mTelephonyManager != null) {
-            mTelephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        if (this.mTelephonyManager != null) {
+            this.mTelephonyManager.listen(this.phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         }
 
-        // code based on plugin cordova-plugin-background-mode
-        Notification.Builder notificationBuilder = new Notification.Builder(this.getApplicationContext())
-                .setContentTitle(NOTIFICATION_TITLE)
-                .setContentText(NOTIFICATION_TEXT)
-                .setOngoing(true)
-                .setPriority(Notification.PRIORITY_MIN);
+        Notification serviceNotification = null;
+        int startWithNotificationID = 0;
 
-        this.startForeground(NOTIFICATION_ID, notificationBuilder.build());
+        // tryes to get the Music Control notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            serviceNotification = this.getActiveNotification(MUSIC_CONTROL_NOTIFICATION);
+
+            if (serviceNotification != null) {
+                startWithNotificationID = MUSIC_CONTROL_NOTIFICATION;
+            }
+        }
+
+        if (serviceNotification == null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                // android 8.1 requires that the notification is assigned to a channel
+                // and it not allows to initialize a hidden notification
+                serviceNotification = this.createNotification();
+            } else {
+                // code based on plugin cordova-plugin-background-mode
+                Notification.Builder notificationBuilder = new Notification.Builder(this.getApplicationContext())
+                        .setContentTitle(NOTIFICATION_TITLE)
+                        .setContentText(NOTIFICATION_TEXT)
+                        .setOngoing(true)
+                        .setPriority(Notification.PRIORITY_MIN);
+
+                serviceNotification = notificationBuilder.build();
+            }
+
+            startWithNotificationID = NOTIFICATION_ID;
+        }
+
+        if (serviceNotification != null) {
+            this.startForeground(startWithNotificationID, serviceNotification);
+        }
 
         PowerManager powerMgr = (PowerManager) this.getSystemService(POWER_SERVICE);
 
@@ -508,10 +542,47 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     private int parseVolume(int volume) {
         if (volume > 100) {
             return 100;
-        } else if(volume < 0) {
+        } else if (volume < 0) {
             return 0;
         }
 
         return volume;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private Notification getActiveNotification(int notificationId) {
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        StatusBarNotification[] barNotifications = notificationManager.getActiveNotifications();
+
+        for (StatusBarNotification notification: barNotifications) {
+            if (notification.getId() == notificationId) {
+                return notification.getNotification();
+            }
+        }
+
+        return null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O_MR1)
+    private Notification createNotification() {
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        CharSequence name = "cordova-plugin-multi-player";
+        String description = "cordova-plugin-multi-player notification";
+        int importance = NotificationManager.IMPORTANCE_LOW;
+
+        NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+
+        notificationChannel.setDescription(description);
+        notificationManager.createNotificationChannel(notificationChannel);
+
+        Notification.Builder notificationBuilder = new Notification.Builder(this.getApplicationContext())
+                .setChannelId(NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(NOTIFICATION_TITLE)
+                .setContentText(NOTIFICATION_TEXT)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_MIN);
+
+        return notificationBuilder.build();
     }
 }

@@ -1,19 +1,19 @@
 var multiPlayer = function(){};
 
 multiPlayer.prototype.initialize = function(successCallback, failureCallback) {
-    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', [ ]);
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', []);
 };
 
 multiPlayer.prototype.play = function(successCallback, failureCallback, url, volume, streamType) {
-    if (typeof volume == "undefined") {
+    if (typeof volume == 'undefined') {
         volume = -1;
     }
 
-    if (typeof streamType == "undefined") {
+    if (typeof streamType == 'undefined') {
         streamType = -1;
     }
 
-    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'play', [url, volume, streamType]);
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'play', [ url, volume, streamType ]);
 };
 
 multiPlayer.prototype.stop = function(successCallback, failureCallback) {
@@ -21,7 +21,7 @@ multiPlayer.prototype.stop = function(successCallback, failureCallback) {
 };
 
 multiPlayer.prototype.setVolume = function(successCallback, failureCallback, volume) {
-    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'setvolume', [volume]);
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'setvolume', [ volume ]);
 };
 
 // https://developer.android.com/reference/android/media/AudioManager.html
