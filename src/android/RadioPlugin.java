@@ -42,6 +42,14 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
                 callbackContext.error(e.getMessage());
                 return false;
             }
+        } else if ("connect".equals(action)) {
+            if (!this.isConnected && !this.isConnecting) {
+                this.isConnecting = true;
+                this.mRadioManager.connect();
+            }
+
+            callbackContext.success();
+            return true;
         } else if ("play".equals(action)) {
             if (!this.isConnected) {
                 if (!this.isConnecting) {
@@ -85,12 +93,16 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
     @Override
     public void onRadioLoading() {
         Log.e(LOG_TAG, "RADIO STATE : LOADING...");
+        this.sendListenerResult("LOADING");
     }
 
     @Override
     public void onRadioConnected() {
         this.isConnecting = false;
         this.isConnected = true;
+
+        Log.e(LOG_TAG, "RADIO STATE : CONNECTED...");
+        this.sendListenerResult("CONNECTED");
 
         if (this.requestedVolume != -1) {
             this.mRadioManager.setRadioVolume(this.requestedVolume);

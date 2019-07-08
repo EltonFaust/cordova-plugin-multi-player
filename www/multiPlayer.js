@@ -1,5 +1,9 @@
 var multiPlayer = function(){};
 
+multiPlayer.prototype.connect = function(successCallback, failureCallback) {
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'connect', []);
+};
+
 multiPlayer.prototype.initialize = function(successCallback, failureCallback) {
     cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', []);
 };
