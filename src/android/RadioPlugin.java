@@ -1,9 +1,5 @@
 package com.eltonfaust.multiplayer;
 
-
-// rm -fr MyApp; cordova create MyApp; cd MyApp;  cordova platform add android; cordova plugin add ../cordova-plugin/;
-//  cordova build android; adb install -r /Users/mradosta/htdocs/intertron/adv-sdk/MyApp/platforms/android/build/outputs/apk/android-debug.apk; adb logcat
-
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -16,101 +12,141 @@ import org.apache.cordova.PluginResult;
 
 import java.util.List;
 
-//import co.mobiwise.library.radio.RadioListener;
-//import co.mobiwise.library.radio.RadioManager;
-
 public class RadioPlugin extends CordovaPlugin implements RadioListener {
+    private static final String LOG_TAG = "RadioPlugin";
 
-	private static final String LOG_TAG = "RadioPlugin";
+    private RadioManager mRadioManager = null;
+    private CallbackContext connectionCallbackContext;
+    private boolean isConnecting = false;
+    private boolean isConnected = false;
+    private JSONArray requestedPlay = null;
+    private int requestedVolume = -1;
 
-	RadioManager mRadioManager = null;
-	private CallbackContext connectionCallbackContext;
+    @Override
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        if ("initialize".equals(action)) {
+            try {
+                this.mRadioManager = RadioManager.with(this.cordova.getActivity());
+                this.mRadioManager.registerListener(this);
+                this.mRadioManager.setLogging(true);
 
-	@Override
-	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		if ("initialize".equals(action)) {
-			try {
-				mRadioManager = RadioManager.with(this.cordova.getActivity());
-				mRadioManager.registerListener(this);
-				mRadioManager.setLogging(true);
-				mRadioManager.connect();
+                this.connectionCallbackContext = callbackContext;
 
-				this.connectionCallbackContext = callbackContext;
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+                pluginResult.setKeepCallback(true);
 
-				PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
-				pluginResult.setKeepCallback(true);
+                callbackContext.sendPluginResult(pluginResult);
+                return true;
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Exception occurred: ".concat(e.getMessage()));
+                callbackContext.error(e.getMessage());
+                return false;
+            }
+        } else if ("connect".equals(action)) {
+            if (!this.isConnected && !this.isConnecting) {
+                this.isConnecting = true;
+                this.mRadioManager.connect();
+            }
 
-				callbackContext.sendPluginResult(pluginResult);
-				return true;
-			} catch (Exception e) {
-				Log.e(LOG_TAG, "Exception occurred: ".concat(e.getMessage()));
-				callbackContext.error(e.getMessage());
-				return false;
-			}
-		} else if ("play".equals(action)) {
-			mRadioManager.startRadio(args.getString(0), args.getInt(1), args.getInt(2));
-			callbackContext.success();
-			return true;
-		} else if ("stop".equals(action)) {
-			mRadioManager.stopRadio();
-			callbackContext.success();
-			return true;
-		} else if ("setvolume".equals(action)) {
-			mRadioManager.setRadioVolume(args.getInt(0));
-			callbackContext.success();
-			return true;
-		}
+            callbackContext.success();
+            return true;
+        } else if ("play".equals(action)) {
+            if (!this.isConnected) {
+                if (!this.isConnecting) {
+                    this.isConnecting = true;
+                    this.mRadioManager.connect();
+                }
 
-		Log.e(LOG_TAG, "Called invalid action: " + action);
-		return false;
-	}
+                this.requestedPlay = args;
+            } else {
+                this.requestedPlay = null;
+                this.mRadioManager.startRadio(args.getString(0), args.getInt(1), args.getInt(2));
+            }
 
-	@Override
-	public void onRadioLoading() {
-		Log.e(LOG_TAG, "RADIO STATE : LOADING...");
-	}
+            callbackContext.success();
+            return true;
+        } else if ("stop".equals(action)) {
+            this.requestedPlay = null;
 
+            if (this.isConnected) {
+               this.mRadioManager.stopRadio();
+            }
 
-	@Override
-	public void onRadioConnected() {
-		/*
-		PluginResult result = new PluginResult(PluginResult.Status.OK, "onRadioConnected");
-		result.setKeepCallback(false);
-		if (callbackContext != null) {
-			callbackContext.sendPluginResult(result);
-			callbackContext = null;
-		}
-		*/
-	}
+            callbackContext.success();
+            return true;
+        } else if ("setvolume".equals(action)) {
+            if (!this.isConnected) {
+                this.requestedVolume = args.getInt(0);
+            } else {
+                this.requestedVolume = -1;
+                this.mRadioManager.setRadioVolume(args.getInt(0));
+            }
 
-	@Override
-	public void onRadioStarted() {
-		Log.e(LOG_TAG, "RADIO STATE: PLAYING...");
-		this.sendListenerResult("STARTED");
-	}
+            callbackContext.success();
+            return true;
+        }
 
-	@Override
-	public void onRadioStopped() {
-		Log.e(LOG_TAG, "RADIO STATE: STOPPED...");
-		this.sendListenerResult("STOPPED");
-	}
+        Log.e(LOG_TAG, "Called invalid action: " + action);
+        return false;
+    }
 
-	@Override
-	public void onMetaDataReceived(String s, String s1) {
-		//TODO Check metadata values. Singer name, song name or whatever you have.
-	}
+    @Override
+    public void onRadioLoading() {
+        Log.e(LOG_TAG, "RADIO STATE : LOADING...");
+        this.sendListenerResult("LOADING");
+    }
 
-	@Override
-	public void onError() {
-		this.sendListenerResult("ERROR");
-	}
+    @Override
+    public void onRadioConnected() {
+        this.isConnecting = false;
+        this.isConnected = true;
 
-	private void sendListenerResult(String result) {
-		if (this.connectionCallbackContext != null) {
-			PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+        Log.e(LOG_TAG, "RADIO STATE : CONNECTED...");
+        this.sendListenerResult("CONNECTED");
 
-			pluginResult.setKeepCallback(true);
-			this.connectionCallbackContext.sendPluginResult(pluginResult);
-		}
-	}
+        if (this.requestedVolume != -1) {
+            this.mRadioManager.setRadioVolume(this.requestedVolume);
+            this.requestedVolume = -1;
+        }
+
+        if (this.requestedPlay != null) {
+            try {
+                this.mRadioManager.startRadio(this.requestedPlay.getString(0), this.requestedPlay.getInt(1), this.requestedPlay.getInt(2));
+            } catch(JSONException e) {
+            }
+
+            this.requestedPlay = null;
+        }
+    }
+
+    @Override
+    public void onRadioStarted() {
+        Log.e(LOG_TAG, "RADIO STATE: PLAYING...");
+        this.sendListenerResult("STARTED");
+    }
+
+    @Override
+    public void onRadioStopped() {
+        Log.e(LOG_TAG, "RADIO STATE: STOPPED...");
+        this.sendListenerResult("STOPPED");
+    }
+
+    @Override
+    public void onMetaDataReceived(String s, String s1) {
+        //TODO Check metadata values. Singer name, song name or whatever you have.
+    }
+
+    @Override
+    public void onError() {
+        this.sendListenerResult("ERROR");
+    }
+
+    private void sendListenerResult(String result) {
+        if (this.connectionCallbackContext != null) {
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+
+            pluginResult.setKeepCallback(true);
+            this.connectionCallbackContext.sendPluginResult(pluginResult);
+        }
+    }
 }

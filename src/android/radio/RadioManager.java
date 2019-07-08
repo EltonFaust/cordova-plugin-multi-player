@@ -73,7 +73,7 @@ public class RadioManager implements IRadioManager {
      * get current service instance
      * @return RadioPlayerService
      */
-    public static RadioPlayerService getService(){
+    public static RadioPlayerService getService() {
         return mService;
     }
 
@@ -173,10 +173,8 @@ public class RadioManager implements IRadioManager {
      * Connection
      */
     private ServiceConnection mServiceConnection = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder binder) {
-
             log("Service Connected.");
 
             mService = ((RadioPlayerService.LocalBinder) binder).getService();
