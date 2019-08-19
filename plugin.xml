@@ -4,7 +4,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:rim="http://www.blackberry.com/ns/widgets"
 	id="cordova-plugin-multi-player"
-	version="1.0.8">
+	version="1.0.9">
 
 	<name>Multi Player Plugin</name>
 	<description>Multi Player Plugin</description>
@@ -73,9 +73,11 @@
 		<source-file src="src/android/libs/aacdecoder/PCMFeed.java" target-dir="src/com/spoledge/aacdecoder/" />
 		<source-file src="src/android/libs/aacdecoder/PlayerCallback.java" target-dir="src/com/spoledge/aacdecoder/" />
 
+		<source-file src="src/android/libs/arm64-v8a/libaacdecoder.so" target-dir="libs/arm64-v8a" />
 		<source-file src="src/android/libs/armeabi/libaacdecoder.so" target-dir="libs/armeabi" />
 		<source-file src="src/android/libs/armeabi-v7a/libaacdecoder.so" target-dir="libs/armeabi-v7a" />
 		<source-file src="src/android/libs/mips/libaacdecoder.so" target-dir="libs/mips" />
+		<source-file src="src/android/libs/mips64/libaacdecoder.so" target-dir="libs/mips64" />
 		<source-file src="src/android/libs/x86/libaacdecoder.so" target-dir="libs/x86" />
 		<source-file src="src/android/libs/x86_64/libaacdecoder.so" target-dir="libs/x86_64" />
 	</platform>
