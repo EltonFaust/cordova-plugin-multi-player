@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -20,6 +21,16 @@ public class RadioManager implements IRadioManager {
      * Logging enable/disable
      */
     private static boolean isLogging = false;
+
+    /**
+     * Streaming url to listen
+     */
+    private static int streamType = AudioManager.STREAM_MUSIC;
+
+    /**
+     * Streaming url to listen
+     */
+    private static String streamURL;
 
     /**
      * Singleton
@@ -52,8 +63,8 @@ public class RadioManager implements IRadioManager {
      */
     private RadioManager(Context mContext) {
         this.mContext = mContext;
-        mRadioListenerQueue = new ArrayList<RadioListener>();
-        isServiceConnected = false;
+        this.mRadioListenerQueue = new ArrayList<RadioListener>();
+        this.isServiceConnected = false;
     }
 
     /**
@@ -78,18 +89,24 @@ public class RadioManager implements IRadioManager {
     }
 
     @Override
-    public void startRadio(String streamURL) {
-        mService.play(streamURL, 100);
+    public void setStreamURL(String streamURL) {
+        this.streamURL = streamURL;
     }
 
     @Override
-    public void startRadio(String streamURL, int volume) {
-        mService.play(streamURL, volume);
+    public void startRadio() {
+        this.startRadio(-1);
     }
 
     @Override
-    public void startRadio(String streamURL, int volume, int streamType) {
-        mService.play(streamURL, volume, streamType);
+    public void startRadio(int streamType) {
+        if (streamType != -1) {
+            this.streamType = streamType;
+        }
+
+        this.mContext.setVolumeControlStream(this.streamType);
+
+        this.mService.play(this.streamType);
     }
 
     /**
@@ -97,15 +114,7 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void stopRadio() {
-        mService.stop();
-    }
-
-    /**
-     * Set Radio Streaming volume
-     */
-    @Override
-    public void setRadioVolume(int volume) {
-        mService.setVolume(volume);
+        this.mService.stop();
     }
 
     /**
@@ -114,8 +123,8 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public boolean isPlaying() {
-        log("IsPlaying : " + mService.isPlaying());
-        return mService.isPlaying();
+        log("IsPlaying : " + this.mService.isPlaying());
+        return this.mService.isPlaying();
     }
 
     /**
@@ -124,10 +133,10 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void registerListener(RadioListener mRadioListener) {
-        if (isServiceConnected) {
-            mService.registerListener(mRadioListener);
+        if (this.isServiceConnected) {
+            this.mService.registerListener(mRadioListener);
         } else {
-            mRadioListenerQueue.add(mRadioListener);
+            this.mRadioListenerQueue.add(mRadioListener);
         }
     }
 
@@ -138,7 +147,7 @@ public class RadioManager implements IRadioManager {
     @Override
     public void unregisterListener(RadioListener mRadioListener) {
         log("Register unregistered.");
-        mService.unregisterListener(mRadioListener);
+        this.mService.unregisterListener(mRadioListener);
     }
 
     /**
@@ -147,7 +156,7 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void setLogging(boolean logging) {
-        isLogging = logging;
+        this.isLogging = logging;
     }
 
     /**
@@ -156,8 +165,8 @@ public class RadioManager implements IRadioManager {
     @Override
     public void connect() {
         log("Requested to connect service.");
-        Intent intent = new Intent(mContext, RadioPlayerService.class);
-        mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(this.mContext, RadioPlayerService.class);
+        this.mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -166,7 +175,7 @@ public class RadioManager implements IRadioManager {
     @Override
     public void disconnect() {
         log("Service Disconnected.");
-        mContext.unbindService(mServiceConnection);
+        this.mContext.unbindService(mServiceConnection);
     }
 
     /**
@@ -177,12 +186,13 @@ public class RadioManager implements IRadioManager {
         public void onServiceConnected(ComponentName arg0, IBinder binder) {
             log("Service Connected.");
 
-            mService = ((RadioPlayerService.LocalBinder) binder).getService();
-            mService.setLogging(isLogging);
-            isServiceConnected = true;
+            RadioManager.this.mService = ((RadioPlayerService.LocalBinder) binder).getService();
+            RadioManager.this.mService.setLogging(RadioManager.this.isLogging);
+            RadioManager.this.mService.setStreamURL(RadioManager.this.streamURL);
+            RadioManager.this.isServiceConnected = true;
 
-            if (!mRadioListenerQueue.isEmpty()) {
-                for (RadioListener mRadioListener : mRadioListenerQueue) {
+            if (!RadioManager.this.mRadioListenerQueue.isEmpty()) {
+                for (RadioListener mRadioListener : RadioManager.this.mRadioListenerQueue) {
                     registerListener(mRadioListener);
                     mRadioListener.onRadioConnected();
                 }
@@ -199,7 +209,7 @@ public class RadioManager implements IRadioManager {
      * @param log
      */
     private void log(String log) {
-        if (isLogging) {
+        if (this.isLogging) {
             Log.v("RadioManager", "RadioManagerLog : " + log);
         }
     }
