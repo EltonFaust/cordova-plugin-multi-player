@@ -12,8 +12,10 @@ import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
@@ -160,7 +162,7 @@ public class RadioPlayerService extends Service {
         super.onCreate();
         mListenerList = new ArrayList<RadioListener>();
 
-        this.mAudioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+        this.mAudioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
         this.mRadioState = State.IDLE;
 
@@ -546,7 +548,7 @@ public class RadioPlayerService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int requestAudioFocus() {
-        int audioUsageType = this.mRadioStreamType = AudioManager.STREAM_ALARM ? AudioAttributes.USAGE_ALARM : AudioAttributes.USAGE_MEDIA;
+        int audioUsageType = this.mRadioStreamType == AudioManager.STREAM_ALARM ? AudioAttributes.USAGE_ALARM : AudioAttributes.USAGE_MEDIA;
 
         int result = this.mAudioManager.requestAudioFocus(
             new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)

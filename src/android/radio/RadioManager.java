@@ -4,17 +4,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.IBinder;
 import android.util.Log;
+import android.app.Activity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by mertsimsek on 03/07/15.
- */
 public class RadioManager implements IRadioManager {
 
     /**
@@ -104,7 +101,7 @@ public class RadioManager implements IRadioManager {
             this.streamType = streamType;
         }
 
-        this.mContext.setVolumeControlStream(this.streamType);
+        ((Activity) this.mContext).setVolumeControlStream(this.streamType);
 
         this.mService.play(this.streamType);
     }
