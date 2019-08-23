@@ -262,6 +262,11 @@ public class RadioPlayerService extends Service {
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             player.setVolume(1f);
             player.setPlayWhenReady(true);
+        } else {
+            this.log("Can't play streaming. Audio focus not granted");
+            this.mRadioState == State.STOPPED_FOCUS_LOSS;
+            this.releasePlayer();
+            this.notifyRadioStoppedFocusLoss();
         }
     }
 

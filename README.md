@@ -22,14 +22,18 @@ onDeviceReady: function() {
 
     navigator.multiPlayer.initialize(function(s) {
         console.log('SUCCESS navigator.multiPlayer.initialize');
-        if (s == 'STARTED') {
-            // the reproduction was successfully started
+        if (s == 'CONNECTED') {
+            // the service responsible for playing was connected
+        } else if (s == 'LOADING') {
+            // the media is loading (called once every play call, not called on buffering content)
+        } else if (s == 'STARTED') {
+            // the media was successfully started playing
         } else if (s == 'STOPPED') {
-            // the reproduction was stopped
+            // the media was stopped
         } else if (s == 'STOPPED_FOCUS_LOSS') {
-            // the reproduction was stopped after other app requested focus
+            // the media was stopped after other app requested focus
         } else if (s == 'ERROR') {
-            // the reproduction raised an error
+            // the media raised an error
         }
     }, function(s) {
         console.log('ERROR navigator.multiPlayer.initialize');
