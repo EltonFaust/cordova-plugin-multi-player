@@ -264,7 +264,7 @@ public class RadioPlayerService extends Service {
             player.setPlayWhenReady(true);
         } else {
             this.log("Can't play streaming. Audio focus not granted");
-            this.mRadioState == State.STOPPED_FOCUS_LOSS;
+            this.mRadioState = State.STOPPED_FOCUS_LOSS;
             this.releasePlayer();
             this.notifyRadioStoppedFocusLoss();
         }
