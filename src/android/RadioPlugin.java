@@ -20,7 +20,6 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
     private boolean isConnecting = false;
     private boolean isConnected = false;
     private JSONArray requestedPlay = null;
-    private int requestedVolume = -1;
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -29,6 +28,7 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
                 this.mRadioManager = RadioManager.with(this.cordova.getActivity());
                 this.mRadioManager.registerListener(this);
                 this.mRadioManager.setLogging(true);
+                this.mRadioManager.setStreamURL(args.getString(0));
 
                 this.connectionCallbackContext = callbackContext;
 
@@ -60,7 +60,7 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
                 this.requestedPlay = args;
             } else {
                 this.requestedPlay = null;
-                this.mRadioManager.startRadio(args.getString(0), args.getInt(1), args.getInt(2));
+                this.mRadioManager.startRadio(args.getInt(0));
             }
 
             callbackContext.success();
@@ -70,16 +70,6 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
 
             if (this.isConnected) {
                this.mRadioManager.stopRadio();
-            }
-
-            callbackContext.success();
-            return true;
-        } else if ("setvolume".equals(action)) {
-            if (!this.isConnected) {
-                this.requestedVolume = args.getInt(0);
-            } else {
-                this.requestedVolume = -1;
-                this.mRadioManager.setRadioVolume(args.getInt(0));
             }
 
             callbackContext.success();
@@ -104,14 +94,9 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
         Log.e(LOG_TAG, "RADIO STATE : CONNECTED...");
         this.sendListenerResult("CONNECTED");
 
-        if (this.requestedVolume != -1) {
-            this.mRadioManager.setRadioVolume(this.requestedVolume);
-            this.requestedVolume = -1;
-        }
-
         if (this.requestedPlay != null) {
             try {
-                this.mRadioManager.startRadio(this.requestedPlay.getString(0), this.requestedPlay.getInt(1), this.requestedPlay.getInt(2));
+                this.mRadioManager.startRadio(this.requestedPlay.getInt(0));
             } catch(JSONException e) {
             }
 
@@ -132,8 +117,9 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
     }
 
     @Override
-    public void onMetaDataReceived(String s, String s1) {
-        //TODO Check metadata values. Singer name, song name or whatever you have.
+    public void onRadioStoppedFocusLoss() {
+        Log.e(LOG_TAG, "RADIO STATE: STOPPED FOCUS LOSS...");
+        this.sendListenerResult("STOPPED_FOCUS_LOSS");
     }
 
     @Override

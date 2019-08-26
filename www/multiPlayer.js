@@ -1,31 +1,23 @@
-var multiPlayer = function(){};
+var multiPlayer = function() {};
+
+multiPlayer.prototype.initialize = function(successCallback, failureCallback, url) {
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', [ url ]);
+};
 
 multiPlayer.prototype.connect = function(successCallback, failureCallback) {
     cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'connect', []);
 };
 
-multiPlayer.prototype.initialize = function(successCallback, failureCallback) {
-    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'initialize', []);
-};
-
-multiPlayer.prototype.play = function(successCallback, failureCallback, url, volume, streamType) {
-    if (typeof volume == 'undefined') {
-        volume = -1;
-    }
-
+multiPlayer.prototype.play = function(successCallback, failureCallback, streamType) {
     if (typeof streamType == 'undefined') {
         streamType = -1;
     }
 
-    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'play', [ url, volume, streamType ]);
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'play', [ streamType ]);
 };
 
 multiPlayer.prototype.stop = function(successCallback, failureCallback) {
     cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'stop', []);
-};
-
-multiPlayer.prototype.setVolume = function(successCallback, failureCallback, volume) {
-    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'setvolume', [ volume ]);
 };
 
 // https://developer.android.com/reference/android/media/AudioManager.html

@@ -1,22 +1,12 @@
 # cordova-plugin-multi-player
 
-This plugin provides an implementation of an Android service library which uses AAC Player. Ready to use Streaming Player Service. (Background Player Service).
-This plugin is based on [cordova-plugin-streaming](https://github.com/mradosta/cordova-plugin-streaming) with a few ajusts.
+This plugin provides an implementation of an Android service library which uses Google's ExoPlayer. Ready to use Streaming Player Service. (Background Player Service).
+This plugin has part of its code base on [cordova-plugin-exoplayer](https://github.com/frontyard/cordova-plugin-exoplayer), with a focus on audio streaming and keeping the audio active on background.
 
 ## Supported Platforms
 
 - Android
 - iOS
-
-
-## Supported URLs
-
-- http://xxxx:1232
-- http://xxxx/abc.pls
-- http://xxxx/abc.ram
-- http://xxxx/abc.wax
-- http://xxxx/abc.m4a
-- http://xxxx/abc.mp3
 
 
 ## Installation
@@ -28,34 +18,38 @@ This plugin is based on [cordova-plugin-streaming](https://github.com/mradosta/c
 ```js
 ...
 onDeviceReady: function() {
+    var url = 'http://hayatmix.net/;yayin.mp3.m3u';
+
     navigator.multiPlayer.initialize(function(s) {
         console.log('SUCCESS navigator.multiPlayer.initialize');
-        if (s == 'STARTED') {
-            // the reproduction was successfully started
+        if (s == 'CONNECTED') {
+            // the service responsible for playing was connected
+        } else if (s == 'LOADING') {
+            // the media is loading (called once every play call, not called on buffering content)
+        } else if (s == 'STARTED') {
+            // the media was successfully started playing
         } else if (s == 'STOPPED') {
-            // the reproduction was stopped
+            // the media was stopped
+        } else if (s == 'STOPPED_FOCUS_LOSS') {
+            // the media was stopped after other app requested focus
         } else if (s == 'ERROR') {
-            // the reproduction raised an error
+            // the media raised an error
         }
     }, function(s) {
         console.log('ERROR navigator.multiPlayer.initialize');
-    });
+    }, url);
 }
 ...
 
-
-var url = 'http://hayatmix.net/;yayin.mp3.m3u';
-// volume between 0 (silent) and 100 (default: 100)
-var volume = 50; 
 // valid constants are 'STREAM_MUSIC' and 'STREAM_ALARM' (default: STREAM_MUSIC)
 var streamType = navigator.multiPlayer.STREAM_ALARM;
 
-// volume and streamType parameters are not required
+// streamType parameter is not required
 navigator.multiPlayer.play(function(s) {
     console.log('SUCCESS navigator.multiPlayer.play');
 }, function(s) {
     console.log('ERROR navigator.multiPlayer.play');
-}, url, volume, streamType);
+}, streamType);
 
 
 navigator.multiPlayer.stop(function(s) {
@@ -63,14 +57,6 @@ navigator.multiPlayer.stop(function(s) {
 }, function(s) {
     console.log('ERROR navigator.multiPlayer.stop');
 });
-
-
-var volume = 50; // volume between 0 (silent) and 100
-navigator.multiPlayer.setVolume(function(s) {
-    console.log('SUCCESS navigator.multiPlayer.setVolume');
-}, function(s) {
-    console.log('ERROR navigator.multiPlayer.setVolume');
-}, volume);
 ```
 
 ## Log Debug
@@ -79,29 +65,6 @@ navigator.multiPlayer.setVolume(function(s) {
 
 ## Libraries Used ##
 
-[AAC Decoder Library](https://github.com/vbartacek/aacdecoder-android)
+[ExoPlayer Library](https://github.com/google/ExoPlayer)
 
 
-## x64 decoder version from ##
-
-[Ti.AndroidStreamer](https://github.com/AppWerft/ti-android-streamer/tree/master/aacdecoderlibs)
-
-
-
-License
---------
-
-
-    Copyright 2016 Martin Radosta.
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.

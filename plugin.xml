@@ -1,92 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:rim="http://www.blackberry.com/ns/widgets"
-	id="cordova-plugin-multi-player"
-	version="1.0.9">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:rim="http://www.blackberry.com/ns/widgets"
+    id="cordova-plugin-multi-player"
+    version="2.0.0">
 
-	<name>Multi Player Plugin</name>
-	<description>Multi Player Plugin</description>
-	<license>Apache 2.0</license>
-	<keywords>streaming,radio,libaacdecoder</keywords>
-	<repo>https://github.com/EltonFaust/cordova-plugin-multi-player</repo>
-	<issue>https://github.com/EltonFaust/cordova-plugin-multi-player/issues</issue>
+    <name>Multi Player Plugin</name>
+    <description>Multi Player Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>streaming,radio,libaacdecoder</keywords>
+    <repo>https://github.com/EltonFaust/cordova-plugin-multi-player</repo>
+    <issue>https://github.com/EltonFaust/cordova-plugin-multi-player/issues</issue>
 
-	<js-module src="www/multiPlayer.js" name="multiPlayer">
-		<clobbers target="navigator.multiPlayer" />
-	</js-module>
+    <js-module src="www/multiPlayer.js" name="multiPlayer">
+        <clobbers target="navigator.multiPlayer" />
+    </js-module>
 
-	<platform name="android">
-		<config-file target="res/xml/config.xml" parent="/*">
-			<feature name="RadioPlugin">
-				<param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin"/>
-				<param name="onload" value="true" />
-			</feature>
-		</config-file>
+    <platform name="android">
+        <framework src="com.google.android.exoplayer:exoplayer:2.6.1"/>
 
-		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<service android:name="com.eltonfaust.multiplayer.RadioPlayerService">
-				<intent-filter>
-					<action android:name="com.eltonfaust.multiplayer.INTENT_PLAYPAUSE"/>
-					<action android:name="com.eltonfaust.multiplayer.INTENT_OPENPLAYER"/>
-					<action android:name="com.eltonfaust.multiplayer.INTENT_CANCEL"/>
-				</intent-filter>
-			</service>
-		</config-file>
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="RadioPlugin">
+                <param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin"/>
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
 
-		<config-file target="AndroidManifest.xml" parent="/*">
-			<uses-permission android:name="android.permission.INTERNET" />
-			<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-			<uses-permission android:name="android.permission.WAKE_LOCK" />
-			<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-		</config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <service android:name="com.eltonfaust.multiplayer.RadioPlayerService">
+                <intent-filter>
+                    <action android:name="com.eltonfaust.multiplayer.INTENT_PLAYPAUSE"/>
+                    <action android:name="com.eltonfaust.multiplayer.INTENT_OPENPLAYER"/>
+                    <action android:name="com.eltonfaust.multiplayer.INTENT_CANCEL"/>
+                </intent-filter>
+            </service>
+        </config-file>
 
-		<source-file src="src/android/res/drawable/btn_notification_collapse.png" target-dir="res/drawable/" />
-		<source-file src="src/android/res/drawable/btn_playback_pause.png" target-dir="res/drawable/" />
-		<source-file src="src/android/res/drawable/btn_playback_play.png" target-dir="res/drawable/" />
-		<source-file src="src/android/res/drawable/default_art.png" target-dir="res/drawable/" />
-		<source-file src="src/android/res/layout/notification.xml" target-dir="res/layout/" />
-		<source-file src="src/android/res/layout/notification_expanded.xml" target-dir="res/layout/" />
-		<source-file src="src/android/res/values/style.xml" target-dir="res/values/" />
-		<source-file src="src/android/res/values/dimens.xml" target-dir="res/values/" />
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+        </config-file>
 
-		<source-file src="src/android/radio/FakeR.java" target-dir="src/com/eltonfaust/multiplayer/" />
-		<source-file src="src/android/radio/IRadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
-		<source-file src="src/android/radio/RadioListener.java" target-dir="src/com/eltonfaust/multiplayer/" />
-		<source-file src="src/android/radio/RadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
-		<source-file src="src/android/radio/RadioPlayerService.java" target-dir="src/com/eltonfaust/multiplayer/" />
-		<source-file src="src/android/radio/StreamLinkDecoder.java" target-dir="src/com/eltonfaust/multiplayer/" />
+        <source-file src="src/android/res/drawable/btn_notification_collapse.png" target-dir="res/drawable/" />
+        <source-file src="src/android/res/drawable/btn_playback_pause.png" target-dir="res/drawable/" />
+        <source-file src="src/android/res/drawable/btn_playback_play.png" target-dir="res/drawable/" />
+        <source-file src="src/android/res/drawable/default_art.png" target-dir="res/drawable/" />
+        <source-file src="src/android/res/layout/notification.xml" target-dir="res/layout/" />
+        <source-file src="src/android/res/layout/notification_expanded.xml" target-dir="res/layout/" />
+        <source-file src="src/android/res/values/style.xml" target-dir="res/values/" />
+        <source-file src="src/android/res/values/dimens.xml" target-dir="res/values/" />
 
-		<source-file src="src/android/RadioPlugin.java" target-dir="src/com/eltonfaust/multiplayer/" />
+        <source-file src="src/android/radio/IRadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
+        <source-file src="src/android/radio/RadioListener.java" target-dir="src/com/eltonfaust/multiplayer/" />
+        <source-file src="src/android/radio/RadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
+        <source-file src="src/android/radio/RadioPlayerService.java" target-dir="src/com/eltonfaust/multiplayer/" />
 
-		<source-file src="src/android/libs/aacdecoder/AACPlayer.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/BufferReader.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/Decoder.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/FlashAACInputStream.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/FlashAACPlayer.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/IcyInputStream.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/IcyURLConnection.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/IcyURLStreamHandler.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/MP3Player.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/MultiPlayer.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/PCMFeed.java" target-dir="src/com/spoledge/aacdecoder/" />
-		<source-file src="src/android/libs/aacdecoder/PlayerCallback.java" target-dir="src/com/spoledge/aacdecoder/" />
-
-		<source-file src="src/android/libs/arm64-v8a/libaacdecoder.so" target-dir="libs/arm64-v8a" />
-		<source-file src="src/android/libs/armeabi/libaacdecoder.so" target-dir="libs/armeabi" />
-		<source-file src="src/android/libs/armeabi-v7a/libaacdecoder.so" target-dir="libs/armeabi-v7a" />
-		<source-file src="src/android/libs/mips/libaacdecoder.so" target-dir="libs/mips" />
-		<source-file src="src/android/libs/mips64/libaacdecoder.so" target-dir="libs/mips64" />
-		<source-file src="src/android/libs/x86/libaacdecoder.so" target-dir="libs/x86" />
-		<source-file src="src/android/libs/x86_64/libaacdecoder.so" target-dir="libs/x86_64" />
-	</platform>
+        <source-file src="src/android/RadioPlugin.java" target-dir="src/com/eltonfaust/multiplayer/" />
+    </platform>
     <platform name="ios">
-		<config-file target="*-Info.plist" parent="UIBackgroundModes">
-			<array>
-	        	<string>audio</string>
-			</array>
-		</config-file>
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+            <array>
+                <string>audio</string>
+            </array>
+        </config-file>
         <config-file paSrent="/*" target="config.xml">
             <feature name="RadioPlugin">
                 <param name="ios-package" value="RadioPlugin" />
