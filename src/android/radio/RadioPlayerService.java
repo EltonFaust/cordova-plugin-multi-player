@@ -37,25 +37,8 @@ import com.google.android.exoplayer2.util.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-LINKS REMOVER:
-https://github.com/wseemann/FFmpegMediaPlayer
-
-https://exoplayer.dev/
-https://github.com/google/ExoPlayer/tree/release-v2/library/core/src/main/java/com/google/android/exoplayer2
-https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/SimpleExoPlayer.html#setVolume-float-
-https://github.com/nzkozar/ExoplayerExample
-https://github.com/frontyard/cordova-plugin-exoplayer/blob/2.0.0/plugin.xml
-https://github.com/frontyard/cordova-plugin-exoplayer/blob/2.0.0/src/android/Player.java
-https://www.npmjs.com/package/cordova-plugin-exoplayer
-*/
-
 public class RadioPlayerService extends Service {
-
-    /**
-     * Logging control variable
-     */
-    private static boolean isLogging = false;
+    private static final String LOG_TAG = "MultiPlayer";
 
     /**
      * Radio buffer and decode capacity(DEFAULT VALUES)
@@ -171,7 +154,7 @@ public class RadioPlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mListenerList = new ArrayList<RadioListener>();
+        this.mListenerList = new ArrayList<RadioListener>();
 
         this.mAudioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
@@ -222,7 +205,8 @@ public class RadioPlayerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.stopForeground(true);
+        this.stopForeground(false);
+        this.stopSelf();
 
         NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_ID);
@@ -233,6 +217,8 @@ public class RadioPlayerService extends Service {
             this.wakeLock.release();
             this.wakeLock = null;
         }
+
+        this.log("destroy");
     }
 
     public void setStreamURL(String mRadioUrl) {
@@ -249,7 +235,9 @@ public class RadioPlayerService extends Service {
 
         boolean changeAudioStreamType = streamType != -1 && this.mRadioStreamType != streamType;
 
-        SimpleExoPlayer player = this.getPlayer(streamType);
+        if (streamType != -1) {
+            this.mRadioStreamType = streamType;
+        }
 
         int result = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
 
@@ -260,6 +248,7 @@ public class RadioPlayerService extends Service {
         }
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            SimpleExoPlayer player = RadioPlayerService.this.getPlayer(changeAudioStreamType);
             player.setVolume(1f);
             player.setPlayWhenReady(true);
         } else {
@@ -271,7 +260,7 @@ public class RadioPlayerService extends Service {
     }
 
     public void play() {
-        this.play(this.mRadioStreamType);
+        this.play(-1);
     }
 
     public void stop() {
@@ -294,27 +283,32 @@ public class RadioPlayerService extends Service {
     }
 
     public void registerListener(RadioListener mListener) {
-        mListenerList.add(mListener);
+        this.mListenerList.add(mListener);
     }
 
     public void unregisterListener(RadioListener mListener) {
-        mListenerList.remove(mListener);
+        this.mListenerList.remove(mListener);
+    }
+
+    public void setListener(RadioListener mListener) {
+        this.mListenerList = new ArrayList<RadioListener>();
+        this.mListenerList.add(mListener);
     }
 
     private void notifyRadioLoading() {
-        for (RadioListener mRadioListener : mListenerList) {
+        for (RadioListener mRadioListener : this.mListenerList) {
             mRadioListener.onRadioLoading();
         }
     }
 
     private void notifyRadioStarted() {
-        for (RadioListener mRadioListener : mListenerList) {
+        for (RadioListener mRadioListener : this.mListenerList) {
             mRadioListener.onRadioStarted();
         }
     }
 
     private void notifyRadioStopped() {
-        for (RadioListener mRadioListener : mListenerList) {
+        for (RadioListener mRadioListener : this.mListenerList) {
             mRadioListener.onRadioStopped();
         }
     }
@@ -336,13 +330,7 @@ public class RadioPlayerService extends Service {
      *
      * @return SimpleExoPlayer
      */
-    private SimpleExoPlayer getPlayer(int streamType) {
-        boolean changeAudioStreamType = streamType != -1 && this.mRadioStreamType != streamType;
-
-        if (streamType != -1) {
-            this.mRadioStreamType = streamType;
-        }
-
+    private SimpleExoPlayer getPlayer(boolean changeAudioStreamType) {
         if (this.mRadioPlayer == null) {
             DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
             TrackSelector trackSelector = new DefaultTrackSelector();
@@ -376,7 +364,7 @@ public class RadioPlayerService extends Service {
     }
 
     private SimpleExoPlayer getPlayer() {
-        return this.getPlayer(-1);
+        return this.getPlayer(false);
     }
 
     private void releasePlayer() {
@@ -400,7 +388,7 @@ public class RadioPlayerService extends Service {
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-            log("Playback parameters changed");
+            RadioPlayerService.this.log("Playback parameters changed");
         }
 
         @Override
@@ -552,22 +540,11 @@ public class RadioPlayerService extends Service {
     }
 
     /**
-     * Enable/Disable log
-     *
-     * @param logging
-     */
-    public void setLogging(boolean logging) {
-        isLogging = logging;
-    }
-
-    /**
      * Logger
      *
      * @param log
      */
     private void log(String log) {
-        if (isLogging) {
-            Log.v("RadioManager", "RadioPlayerService : " + log);
-        }
+        Log.v(LOG_TAG, "RadioPlayerService : " + log);
     }
 }

@@ -24,6 +24,8 @@ onDeviceReady: function() {
         console.log('SUCCESS navigator.multiPlayer.initialize');
         if (s == 'CONNECTED') {
             // the service responsible for playing was connected
+        } else if (s == 'DISCONNECTED') {
+            // the service responsible for playing was disconnected
         } else if (s == 'LOADING') {
             // the media is loading (called once every play call, not called on buffering content)
         } else if (s == 'STARTED') {
@@ -35,7 +37,7 @@ onDeviceReady: function() {
         } else if (s == 'ERROR') {
             // the media raised an error
         }
-    }, function(s) {
+    }, function(e) {
         console.log('ERROR navigator.multiPlayer.initialize');
     }, url);
 }
@@ -47,21 +49,36 @@ var streamType = navigator.multiPlayer.STREAM_ALARM;
 // streamType parameter is not required
 navigator.multiPlayer.play(function(s) {
     console.log('SUCCESS navigator.multiPlayer.play');
-}, function(s) {
+}, function(e) {
     console.log('ERROR navigator.multiPlayer.play');
 }, streamType);
 
-
 navigator.multiPlayer.stop(function(s) {
     console.log('SUCCESS navigator.multiPlayer.stop');
-}, function(s) {
+}, function(e) {
     console.log('ERROR navigator.multiPlayer.stop');
+});
+
+// initialize the service responsible for playing the stream
+// this is not required, since its automatically connected when is called the play action
+navigator.multiPlayer.connect(function(s) {
+    console.log('SUCCESS navigator.multiPlayer.connect');
+}, function(e) {
+    console.log('ERROR navigator.multiPlayer.connect');
+});
+
+// close the service responsible for playing the stream
+// this is not required, since its automatically disconnected when the app is closed
+navigator.multiPlayer.disconnect(function(s) {
+    console.log('SUCCESS navigator.multiPlayer.disconnect');
+}, function(e) {
+    console.log('ERROR navigator.multiPlayer.disconnect');
 });
 ```
 
 ## Log Debug
 
-    adb logcat -s "LOG" -s "RadioPlugin" -s "RadioManager" -s "AACPlayer" -s "BufferReader" -s "FlashAACInputStream" -s "IcyInputStream" -s "MP3Player" -s "MultiPlayer" -s "PCMFeed"
+    adb logcat -s "LOG" -s "MultiPlayer"
 
 ## Libraries Used ##
 

@@ -13,11 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RadioManager implements IRadioManager {
-
-    /**
-     * Logging enable/disable
-     */
-    private static boolean isLogging = false;
+    private static final String LOG_TAG = "MultiPlayer";
 
     /**
      * Streaming url to listen
@@ -45,6 +41,11 @@ public class RadioManager implements IRadioManager {
     private Context mContext;
 
     /**
+     * Context
+     */
+    private Context mAppContext;
+
+    /**
      * Listeners
      */
     private List<RadioListener> mRadioListenerQueue;
@@ -60,6 +61,8 @@ public class RadioManager implements IRadioManager {
      */
     private RadioManager(Context mContext) {
         this.mContext = mContext;
+        this.mAppContext = mContext.getApplicationContext();
+
         this.mRadioListenerQueue = new ArrayList<RadioListener>();
         this.isServiceConnected = false;
     }
@@ -73,6 +76,19 @@ public class RadioManager implements IRadioManager {
         if (instance == null) {
             instance = new RadioManager(mContext);
         }
+
+        return instance;
+    }
+
+    /**
+     * Singleton
+     * @param mContext
+     * @param mRadioListener
+     * @return
+     */
+    public static RadioManager with(Context mContext, RadioListener mRadioListener) {
+        RadioManager instance = RadioManager.with(mContext);
+        instance.setListener(mRadioListener);
 
         return instance;
     }
@@ -138,6 +154,20 @@ public class RadioManager implements IRadioManager {
     }
 
     /**
+     * Register listener to listen radio service actions
+     * @param mRadioListener
+     */
+    @Override
+    public void setListener(RadioListener mRadioListener) {
+        if (this.isServiceConnected) {
+            this.mService.setListener(mRadioListener);
+        } else {
+            this.mRadioListenerQueue = new ArrayList<RadioListener>();
+            this.mRadioListenerQueue.add(mRadioListener);
+        }
+    }
+
+    /**
      * Unregister listeners
      * @param mRadioListener
      */
@@ -148,22 +178,13 @@ public class RadioManager implements IRadioManager {
     }
 
     /**
-     * Set/Unset Logging
-     * @param logging
-     */
-    @Override
-    public void setLogging(boolean logging) {
-        this.isLogging = logging;
-    }
-
-    /**
      * Connect radio player service
      */
     @Override
     public void connect() {
         log("Requested to connect service.");
-        Intent intent = new Intent(this.mContext, RadioPlayerService.class);
-        this.mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(this.mAppContext, RadioPlayerService.class);
+        this.mAppContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -171,8 +192,13 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void disconnect() {
-        log("Service Disconnected.");
-        this.mContext.unbindService(mServiceConnection);
+        log("Requested to disconnect service.");
+
+        if (this.isServiceConnected) {
+            this.mAppContext.unbindService(mServiceConnection);
+            this.mService = null;
+            this.isServiceConnected = false;
+        }
     }
 
     /**
@@ -184,7 +210,6 @@ public class RadioManager implements IRadioManager {
             log("Service Connected.");
 
             RadioManager.this.mService = ((RadioPlayerService.LocalBinder) binder).getService();
-            RadioManager.this.mService.setLogging(RadioManager.this.isLogging);
             RadioManager.this.mService.setStreamURL(RadioManager.this.streamURL);
             RadioManager.this.isServiceConnected = true;
 
@@ -198,6 +223,9 @@ public class RadioManager implements IRadioManager {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            log("Service Disconnected.");
+            RadioManager.this.isServiceConnected = false;
+            // RadioManager.this.mService = null;
         }
     };
 
@@ -206,8 +234,6 @@ public class RadioManager implements IRadioManager {
      * @param log
      */
     private void log(String log) {
-        if (this.isLogging) {
-            Log.v("RadioManager", "RadioManagerLog : " + log);
-        }
+        Log.v(LOG_TAG, "RadioManager : " + log);
     }
 }
