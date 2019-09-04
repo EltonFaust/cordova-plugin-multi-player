@@ -8,10 +8,9 @@ public interface IRadioManager {
 
     boolean isPlaying();
 
+    void setListener(RadioListener mRadioListener);
     void registerListener(RadioListener mRadioListener);
     void unregisterListener(RadioListener mRadioListener);
-
-    void setLogging(boolean logging);
 
     void connect();
     void disconnect();

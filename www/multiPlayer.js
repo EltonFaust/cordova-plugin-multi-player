@@ -8,6 +8,10 @@ multiPlayer.prototype.connect = function(successCallback, failureCallback) {
     cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'connect', []);
 };
 
+multiPlayer.prototype.disconnect = function(successCallback, failureCallback) {
+    cordova.exec(successCallback, failureCallback, 'RadioPlugin', 'disconnect', []);
+};
+
 multiPlayer.prototype.play = function(successCallback, failureCallback, streamType) {
     if (typeof streamType == 'undefined') {
         streamType = -1;

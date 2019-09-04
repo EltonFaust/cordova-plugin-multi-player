@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     id="cordova-plugin-multi-player"
-    version="2.0.0">
+    version="2.0.1">
 
     <name>Multi Player Plugin</name>
     <description>Multi Player Plugin</description>
@@ -18,23 +18,17 @@
     </js-module>
 
     <platform name="android">
-        <framework src="com.google.android.exoplayer:exoplayer:2.6.1"/>
+        <framework src="com.google.android.exoplayer:exoplayer:2.6.1" />
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="RadioPlugin">
-                <param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin"/>
+                <param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin" />
                 <param name="onload" value="true" />
             </feature>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <service android:name="com.eltonfaust.multiplayer.RadioPlayerService">
-                <intent-filter>
-                    <action android:name="com.eltonfaust.multiplayer.INTENT_PLAYPAUSE"/>
-                    <action android:name="com.eltonfaust.multiplayer.INTENT_OPENPLAYER"/>
-                    <action android:name="com.eltonfaust.multiplayer.INTENT_CANCEL"/>
-                </intent-filter>
-            </service>
+            <service android:name="com.eltonfaust.multiplayer.RadioPlayerService" />
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/*">
