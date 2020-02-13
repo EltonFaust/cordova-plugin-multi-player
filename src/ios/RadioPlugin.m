@@ -9,6 +9,7 @@
 @property NSString *callbackId;
 @property AVPlayer *streamPlayer;
 @property NSInteger volume;
+@property NSString *streamUrl;
 
 - (void)initialize:(CDVInvokedUrlCommand*)command;
 - (void)play:(CDVInvokedUrlCommand*)command;
@@ -26,6 +27,7 @@
 
     self.callbackId = command.callbackId;
     self.volume = 100;
+    self.streamUrl = [command argumentAtIndex:0];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [pluginResult setKeepCallbackAsBool:YES];
@@ -39,14 +41,14 @@
 
     NSLog(@"Play \n");
 
-    NSString *streamUrl = [command argumentAtIndex:0];
+    // NSString *streamUrl = [command argumentAtIndex:0];
     NSInteger volume = [[command argumentAtIndex:1] integerValue];
 
     if (volume != -1) {
         [self mp_setVolume:volume];
     }
 
-    NSURL *streamNSURL = [NSURL URLWithString:streamUrl];
+    NSURL *streamNSURL = [NSURL URLWithString:self.streamUrl];
 
     self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL];
     [self.streamPlayer addObserver:self forKeyPath:@"status" options:0 context:nil];
@@ -96,7 +98,7 @@
             NSLog(@"AVPlayer Failed");
             [self mp_sendListenerResult:@"ERROR"];
         } else if (self.streamPlayer.status == AVPlayerStatusReadyToPlay) {
-            // 
+            //
             NSLog(@"AVPlayerStatusReadyToPlay");
             self.streamPlayer.volume = self.volume / 100.00;
             [self.streamPlayer play];
