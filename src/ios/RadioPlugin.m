@@ -42,10 +42,12 @@
     NSLog(@"Play \n");
 
     // NSString *streamUrl = [command argumentAtIndex:0];
-    NSInteger volume = [[command argumentAtIndex:1] integerValue];
-
-    if (volume != -1) {
-        [self mp_setVolume:volume];
+    id volObj = [command argumentAtIndex:1];
+    if(volObj) {
+        NSInteger volume = [volObj integerValue];
+        if (volume >= 0) {
+            [self mp_setVolume:volume];
+        }
     }
 
     NSURL *streamNSURL = [NSURL URLWithString:self.streamUrl];
