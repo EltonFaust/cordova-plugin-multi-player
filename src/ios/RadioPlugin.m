@@ -9,6 +9,7 @@
 @property NSString *callbackId;
 @property AVPlayer *streamPlayer;
 @property NSInteger volume;
+@property NSString *streamUrl;
 
 - (void)initialize:(CDVInvokedUrlCommand*)command;
 - (void)play:(CDVInvokedUrlCommand*)command;
@@ -26,6 +27,7 @@
 
     self.callbackId = command.callbackId;
     self.volume = 100;
+    self.streamUrl = [command argumentAtIndex:0];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [pluginResult setKeepCallbackAsBool:YES];
@@ -39,20 +41,45 @@
 
     NSLog(@"Play \n");
 
-    NSString *streamUrl = [command argumentAtIndex:0];
-    NSInteger volume = [[command argumentAtIndex:1] integerValue];
-
-    if (volume != -1) {
-        [self mp_setVolume:volume];
+    // NSString *streamUrl = [command argumentAtIndex:0];
+    id volObj = [command argumentAtIndex:1];
+    if(volObj) {
+        NSInteger volume = [volObj integerValue];
+        if (volume >= 0) {
+            [self mp_setVolume:volume];
+        }
     }
 
-    NSURL *streamNSURL = [NSURL URLWithString:streamUrl];
+    NSURL *streamNSURL = [NSURL URLWithString:self.streamUrl];
 
     self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL];
     [self.streamPlayer addObserver:self forKeyPath:@"status" options:0 context:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioInterrupt:) name:AVAudioSessionInterruptionNotification object:nil];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) audioInterrupt:(NSNotification*)notification {
+    NSNumber *interruptionType = (NSNumber*)[notification.userInfo valueForKey:AVAudioSessionInterruptionTypeKey];
+    switch ([interruptionType integerValue]) {
+        case AVAudioSessionInterruptionTypeBegan:
+            NSLog(@"Pausando...");
+            [self.streamPlayer pause];
+            [self mp_sendListenerResult:@"STOPPED"];
+            break;
+        case AVAudioSessionInterruptionTypeEnded:
+        {
+            if ([(NSNumber*)[notification.userInfo valueForKey:AVAudioSessionInterruptionOptionKey] intValue] == AVAudioSessionInterruptionOptionShouldResume) {
+                NSLog(@"Reproduciendo...");
+                [self.streamPlayer play];
+                //[self mp_sendListenerResult:@"STARTED"];
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 - (void)stop:(CDVInvokedUrlCommand*)command
@@ -96,7 +123,7 @@
             NSLog(@"AVPlayer Failed");
             [self mp_sendListenerResult:@"ERROR"];
         } else if (self.streamPlayer.status == AVPlayerStatusReadyToPlay) {
-            // 
+            //
             NSLog(@"AVPlayerStatusReadyToPlay");
             self.streamPlayer.volume = self.volume / 100.00;
             [self.streamPlayer play];
