@@ -54,9 +54,32 @@
 
     self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL];
     [self.streamPlayer addObserver:self forKeyPath:@"status" options:0 context:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioInterrupt:) name:AVAudioSessionInterruptionNotification object:nil];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) audioInterrupt:(NSNotification*)notification {
+    NSNumber *interruptionType = (NSNumber*)[notification.userInfo valueForKey:AVAudioSessionInterruptionTypeKey];
+    switch ([interruptionType integerValue]) {
+        case AVAudioSessionInterruptionTypeBegan:
+            NSLog(@"Pausando...");
+            [self.streamPlayer pause];
+            [self mp_sendListenerResult:@"STOPPED"];
+            break;
+        case AVAudioSessionInterruptionTypeEnded:
+        {
+            if ([(NSNumber*)[notification.userInfo valueForKey:AVAudioSessionInterruptionOptionKey] intValue] == AVAudioSessionInterruptionOptionShouldResume) {
+                NSLog(@"Reproduciendo...");
+                [self.streamPlayer play];
+                //[self mp_sendListenerResult:@"STARTED"];
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 - (void)stop:(CDVInvokedUrlCommand*)command
