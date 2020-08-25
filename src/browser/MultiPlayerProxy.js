@@ -1,18 +1,17 @@
 
 var MultiPlayerProxy = (function () {
+    function noop() { }
+    var blankAudio = 'data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA==';
+
     var audioEl;
     var sourceEl;
     var streamUrl;
-    var sendListenerResult;
+    var sendListenerResult = noop;
 
     var isConnected = false;
     var isPlaying = false;
     var requestedInitPlaying = false;
     var requestedPlay = false;
-
-    function MultiPlayerConstruct() { }
-
-    function noop() { }
 
     function sendErrorNotInitialized(failureCallback) {
         if (streamUrl) {
@@ -24,11 +23,15 @@ var MultiPlayerProxy = (function () {
     }
 
     function errorListener() {
+        if (!sourceEl.src || sourceEl.src == blankAudio) {
+            return;
+        }
+
         sendListenerResult('ERROR');
     }
 
     function loadingListener() {
-        if (!sourceEl.src) {
+        if (!sourceEl.src || sourceEl.sr == blankAudio) {
             return;
         }
 
@@ -47,28 +50,37 @@ var MultiPlayerProxy = (function () {
         isPlaying = false;
         requestedInitPlaying = false;
 
+        // set a blank audio to force stop loading from streaming
+        sourceEl.src = blankAudio;
+        audioEl.load();
+
         sendListenerResult('STOPPED');
     }
 
-    MultiPlayerConstruct.prototype.initialize = function (successCallback, failureCallback, url) {
+    function initialize(successCallback, failureCallback, url) {
         streamUrl = url;
         audioEl = window.document.createElement('audio');
         sourceEl = window.document.createElement('source');
         audioEl.appendChild(sourceEl);
+        document.body.appendChild(audioEl);
 
-        sendListenerResult = successCallback || noop;
+        successCallback(null, { keepCallback: true, status: cordova.callbackStatus.NO_RESULT });
+
+        sendListenerResult = function (message) {
+            (successCallback || noop)(message, { keepCallback: true });
+        };
     };
 
-    MultiPlayerConstruct.prototype.connect = function (successCallback, failureCallback) {
+    function connect(successCallback, failureCallback) {
         if (!sendErrorNotInitialized(failureCallback) || isConnected) {
             return;
         }
 
-        sourceEl.addEventListener('error', errorListener, false);
-        audioEl.addEventListener('ended', errorListener, false);
-        audioEl.addEventListener('playing', playingListener, false);
-        audioEl.addEventListener('pause', pausedListener, false);
-        audioEl.addEventListener('loadstart', loadingListener, false);
+        sourceEl.addEventListener('error', errorListener);
+        audioEl.addEventListener('ended', errorListener);
+        audioEl.addEventListener('playing', playingListener);
+        audioEl.addEventListener('pause', pausedListener);
+        audioEl.addEventListener('loadstart', loadingListener);
 
         isConnected = true;
 
@@ -77,11 +89,11 @@ var MultiPlayerProxy = (function () {
 
         if (requestedPlay) {
             requestedPlay = false;
-            this.play(successCallback, failureCallback);
+            play(successCallback, failureCallback);
         }
     };
 
-    MultiPlayerConstruct.prototype.disconnect = function (successCallback, failureCallback) {
+    function disconnect(successCallback, failureCallback) {
         if (!sendErrorNotInitialized(failureCallback) || !isConnected) {
             return;
         }
@@ -95,21 +107,21 @@ var MultiPlayerProxy = (function () {
         isConnected = false;
 
         if (isPlaying || requestedInitPlaying) {
-            this.stop(noop, failureCallback);
+            stop(noop, failureCallback);
         }
 
         successCallback && successCallback();
         sendListenerResult('DISCONNECTED');
     };
 
-    MultiPlayerConstruct.prototype.play = function (successCallback, failureCallback) {
+    function play(successCallback, failureCallback) {
         if (!sendErrorNotInitialized(failureCallback)) {
             return;
         }
 
         if (!isConnected) {
             requestedPlay = true;
-            this.connect(successCallback, failureCallback);
+            connect(successCallback, failureCallback);
             return;
         }
 
@@ -135,7 +147,7 @@ var MultiPlayerProxy = (function () {
         successCallback && successCallback();
     };
 
-    MultiPlayerConstruct.prototype.stop = function (successCallback, failureCallback) {
+    function stop(successCallback, failureCallback) {
         if (!sendErrorNotInitialized(failureCallback)) {
             return;
         }
@@ -146,14 +158,18 @@ var MultiPlayerProxy = (function () {
         }
 
         audioEl.pause();
-        sourceEl.src = '';
-        audioEl.load();
         requestedPlay = false;
 
         successCallback && successCallback();
     };
 
-    return new MultiPlayerConstruct();
+    return {
+        initialize: initialize,
+        connect: connect,
+        disconnect: disconnect,
+        play: play,
+        stop: stop,
+    };
 })();
 
 module.exports = MultiPlayerProxy;
