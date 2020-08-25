@@ -4,7 +4,7 @@
 #import <Cordova/CDVPluginResult.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface RadioPlugin : CDVPlugin
+@interface MultiPlayer : CDVPlugin
 
 @property NSString *callbackId;
 @property AVPlayer *streamPlayer;
@@ -16,7 +16,7 @@
 - (void)setvolume:(CDVInvokedUrlCommand*)command;
 @end
 
-@implementation RadioPlugin
+@implementation MultiPlayer
 
 #pragma mark Plugin methods
 
@@ -96,7 +96,7 @@
             NSLog(@"AVPlayer Failed");
             [self mp_sendListenerResult:@"ERROR"];
         } else if (self.streamPlayer.status == AVPlayerStatusReadyToPlay) {
-            // 
+            //
             NSLog(@"AVPlayerStatusReadyToPlay");
             self.streamPlayer.volume = self.volume / 100.00;
             [self.streamPlayer play];

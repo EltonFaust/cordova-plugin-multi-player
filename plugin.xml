@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     id="cordova-plugin-multi-player"
-    version="2.0.1">
+    version="2.0.2">
 
     <name>Multi Player Plugin</name>
     <description>Multi Player Plugin</description>
@@ -17,12 +17,13 @@
         <clobbers target="navigator.multiPlayer" />
     </js-module>
 
+    <!-- Android -->
     <platform name="android">
         <framework src="com.google.android.exoplayer:exoplayer:2.6.1" />
 
         <config-file target="res/xml/config.xml" parent="/*">
-            <feature name="RadioPlugin">
-                <param name="android-package" value="com.eltonfaust.multiplayer.RadioPlugin" />
+            <feature name="MultiPlayer">
+                <param name="android-package" value="com.eltonfaust.multiplayer.MultiPlayer" />
                 <param name="onload" value="true" />
             </feature>
         </config-file>
@@ -51,8 +52,10 @@
         <source-file src="src/android/radio/RadioManager.java" target-dir="src/com/eltonfaust/multiplayer/" />
         <source-file src="src/android/radio/RadioPlayerService.java" target-dir="src/com/eltonfaust/multiplayer/" />
 
-        <source-file src="src/android/RadioPlugin.java" target-dir="src/com/eltonfaust/multiplayer/" />
+        <source-file src="src/android/MultiPlayer.java" target-dir="src/com/eltonfaust/multiplayer/" />
     </platform>
+
+    <!-- iOS -->
     <platform name="ios">
         <config-file target="*-Info.plist" parent="UIBackgroundModes">
             <array>
@@ -60,10 +63,17 @@
             </array>
         </config-file>
         <config-file paSrent="/*" target="config.xml">
-            <feature name="RadioPlugin">
-                <param name="ios-package" value="RadioPlugin" />
+            <feature name="MultiPlayer">
+                <param name="ios-package" value="MultiPlayer" />
             </feature>
         </config-file>
-        <source-file src="src/ios/RadioPlugin.m" />
+        <source-file src="src/ios/MultiPlayer.m" />
+    </platform>
+
+    <!-- browser -->
+    <platform name="browser">
+        <js-module src="src/browser/MultiPlayerProxy.js" name="MultiPlayerProxy">
+            <runs />
+        </js-module>
     </platform>
 </plugin>

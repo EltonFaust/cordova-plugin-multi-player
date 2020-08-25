@@ -7,7 +7,7 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-public class RadioPlugin extends CordovaPlugin implements RadioListener {
+public class MultiPlayer extends CordovaPlugin implements RadioListener {
     private static final String LOG_TAG = "MultiPlayer";
 
     private RadioManager mRadioManager = null;
@@ -157,6 +157,6 @@ public class RadioPlugin extends CordovaPlugin implements RadioListener {
      * @param log
      */
     private void log(String log) {
-        Log.v(LOG_TAG, "RadioPlugin : " + log);
+        Log.v(LOG_TAG, "Plugin : " + log);
     }
 }
