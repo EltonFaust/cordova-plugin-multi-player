@@ -10,10 +10,27 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 - Browser (new)
 
 
+## Requirements
+
+Starting to version `2.1.0`, requires `cordova@8`, `cordova-android@8` and the use of androidx (required for the latest ExoPlayer version, that is not yet available on cordova).
+To complain with androidx requirements (if not available yet), you can install the plugins [cordova-plugin-androidx](https://github.com/dpa99c/cordova-plugin-androidx) and [cordova-plugin-androidx-adapter](https://github.com/dpa99c/cordova-plugin-androidx-adapter) with:
+```sh
+cordova plugin add cordova-plugin-androidx
+cordova plugin add cordova-plugin-androidx-adapter
+```
+
 ## Installation
 
-    cordova plugin add cordova-plugin-multi-player
+```sh
+cordova plugin add cordova-plugin-multi-player
+```
 
+### Optional dependency
+
+It's recommended to use the plugin [cordova-plugin-music-controls2](https://github.com/ghenry22/cordova-plugin-music-controls2), since instead of creating a generic notification, to inform the user that there is a service in background, it uses the music controls plugin notification to do so.
+```sh
+cordova plugin add cordova-plugin-music-controls2
+```
 
 ### Quick Example
 ```js
@@ -21,7 +38,7 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 onDeviceReady: function() {
     var url = 'http://hayatmix.net/;yayin.mp3.m3u';
 
-    navigator.multiPlayer.initialize(function(s) {
+    navigator.multiPlayer.initialize(function (s) {
         console.log('SUCCESS navigator.multiPlayer.initialize');
         if (s == 'CONNECTED') {
             // the service responsible for playing was connected
@@ -38,7 +55,7 @@ onDeviceReady: function() {
         } else if (s == 'ERROR') {
             // the media raised an error
         }
-    }, function(e) {
+    }, function (e) {
         console.log('ERROR navigator.multiPlayer.initialize');
     }, url);
 }
@@ -48,41 +65,40 @@ onDeviceReady: function() {
 var streamType = navigator.multiPlayer.STREAM_ALARM;
 
 // streamType parameter is not required
-navigator.multiPlayer.play(function(s) {
+navigator.multiPlayer.play(function (s) {
     console.log('SUCCESS navigator.multiPlayer.play');
-}, function(e) {
+}, function (e) {
     console.log('ERROR navigator.multiPlayer.play');
 }, streamType);
 
-navigator.multiPlayer.stop(function(s) {
+navigator.multiPlayer.stop(function (s) {
     console.log('SUCCESS navigator.multiPlayer.stop');
-}, function(e) {
+}, function (e) {
     console.log('ERROR navigator.multiPlayer.stop');
 });
 
 // initialize the service responsible for playing the stream
 // this is not required, since its automatically connected when is called the play action
-navigator.multiPlayer.connect(function(s) {
+navigator.multiPlayer.connect(function (s) {
     console.log('SUCCESS navigator.multiPlayer.connect');
-}, function(e) {
+}, function (e) {
     console.log('ERROR navigator.multiPlayer.connect');
 });
 
 // close the service responsible for playing the stream
 // this is not required, since its automatically disconnected when the app is closed
-navigator.multiPlayer.disconnect(function(s) {
+navigator.multiPlayer.disconnect(function (s) {
     console.log('SUCCESS navigator.multiPlayer.disconnect');
-}, function(e) {
+}, function (e) {
     console.log('ERROR navigator.multiPlayer.disconnect');
 });
 ```
 
 ## Log Debug
-
-    adb logcat -s "LOG" -s "MultiPlayer"
+```sh
+adb logcat -s "LOG" -s "MultiPlayer"
+```
 
 ## Libraries Used ##
 
 [ExoPlayer Library](https://github.com/google/ExoPlayer)
-
-

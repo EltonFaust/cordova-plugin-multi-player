@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     id="cordova-plugin-multi-player"
-    version="2.0.2">
+    version="2.1.0">
 
     <name>Multi Player Plugin</name>
     <description>Multi Player Plugin</description>
@@ -13,13 +13,18 @@
     <repo>https://github.com/EltonFaust/cordova-plugin-multi-player</repo>
     <issue>https://github.com/EltonFaust/cordova-plugin-multi-player/issues</issue>
 
+    <engines>
+        <engine name="cordova" version=">=8.0.0" />
+        <engine name="cordova-android" version=">=8.0.0" />
+    </engines>
+
     <js-module src="www/multiPlayer.js" name="multiPlayer">
         <clobbers target="navigator.multiPlayer" />
     </js-module>
 
     <!-- Android -->
     <platform name="android">
-        <framework src="com.google.android.exoplayer:exoplayer:2.6.1" />
+        <framework src="com.google.android.exoplayer:exoplayer:2.11.8" />
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="MultiPlayer">
