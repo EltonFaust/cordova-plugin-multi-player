@@ -59,7 +59,7 @@ public class RadioPlayerService extends Service {
     private static final String NOTIFICATION_TITLE = "App is running in background";
 
     // Default text of the background notification
-    private static final String NOTIFICATION_TEXT = "Doing heavy tasks.";
+    private static final String NOTIFICATION_TEXT = "Playing in background";
 
     /**
      * State enum for Radio Player state (IDLE, PLAYING, STOPPED, INTERRUPTED)
@@ -436,9 +436,9 @@ public class RadioPlayerService extends Service {
         public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
         }
 
-        @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
-        }
+        // @Override
+        // public void onTimelineChanged(Timeline timeline, Object manifest) {
+        // }
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
