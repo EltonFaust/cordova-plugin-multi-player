@@ -29,6 +29,10 @@ var MultiPlayer = (function () {
         cordova.exec(successCallback, failureCallback, 'MultiPlayer', 'stop', []);
     };
 
+    MultiPlayerConstruct.prototype.getDuration = function(successCallback, failureCallback) {
+        cordova.exec(successCallback, failureCallback, 'MultiPlayer', 'getDuration', []);
+    };
+
     return new MultiPlayerConstruct();
 })();
 

@@ -236,4 +236,11 @@ public class RadioManager implements IRadioManager {
     private void log(String log) {
         Log.v(LOG_TAG, "RadioManager : " + log);
     }
+
+    public int getDuration() {
+        if (this.isServiceConnected) {
+            return this.mService.getDuration();
+        }
+        return -1;
+    }
 }

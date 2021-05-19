@@ -19,7 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -343,7 +343,7 @@ public class RadioPlayerService extends Service {
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
             Handler mainHandler = new Handler();
-            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(this.mRadioUrl), dataSourceFactory, extractorsFactory, mainHandler, null);
+            MediaSource mediaSource = new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(this.mRadioUrl));
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 this.setPlayerAudioAttributes(changeAudioStreamType);
@@ -546,5 +546,9 @@ public class RadioPlayerService extends Service {
      */
     private void log(String log) {
         Log.v(LOG_TAG, "RadioPlayerService : " + log);
+    }
+
+    public  int getDuration() {
+        return (int) this.mRadioPlayer.getDuration();
     }
 }
