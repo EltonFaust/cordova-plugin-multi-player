@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     id="cordova-plugin-multi-player"
-    version="2.1.0">
+    version="2.1.1">
 
     <name>Multi Player Plugin</name>
     <description>Multi Player Plugin</description>
@@ -24,7 +24,7 @@
 
     <!-- Android -->
     <platform name="android">
-        <framework src="com.google.android.exoplayer:exoplayer:2.11.8" />
+        <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="MultiPlayer">

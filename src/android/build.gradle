@@ -1,0 +1,13 @@
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url 'https://google.bintray.com/exoplayer/'
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.exoplayer:exoplayer:2.11.8'
+}

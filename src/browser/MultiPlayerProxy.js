@@ -31,7 +31,7 @@ var MultiPlayerProxy = (function () {
     }
 
     function loadingListener() {
-        if (!sourceEl.src || sourceEl.sr == blankAudio) {
+        if (!sourceEl.src || sourceEl.src == blankAudio) {
             return;
         }
 
