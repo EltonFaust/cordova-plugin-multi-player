@@ -38,26 +38,35 @@ cordova plugin add cordova-plugin-music-controls2
 onDeviceReady: function() {
     var url = 'http://hayatmix.net/;yayin.mp3.m3u';
 
-    navigator.multiPlayer.initialize(function (s) {
-        console.log('SUCCESS navigator.multiPlayer.initialize');
-        if (s == 'CONNECTED') {
-            // the service responsible for playing was connected
-        } else if (s == 'DISCONNECTED') {
-            // the service responsible for playing was disconnected
-        } else if (s == 'LOADING') {
-            // the media is loading (called once every play call, not called on buffering content)
-        } else if (s == 'STARTED') {
-            // the media was successfully started playing
-        } else if (s == 'STOPPED') {
-            // the media was stopped
-        } else if (s == 'STOPPED_FOCUS_LOSS') {
-            // the media was stopped after other app requested focus
-        } else if (s == 'ERROR') {
-            // the media raised an error
-        }
-    }, function (e) {
-        console.log('ERROR navigator.multiPlayer.initialize');
-    }, url);
+    navigator.multiPlayer.initialize(
+        function (s) {
+            console.log('SUCCESS navigator.multiPlayer.initialize');
+            if (s == 'CONNECTED') {
+                // the service responsible for playing was connected
+            } else if (s == 'DISCONNECTED') {
+                // the service responsible for playing was disconnected
+            } else if (s == 'LOADING') {
+                // the media is loading (called once every play call, not called on buffering content)
+            } else if (s == 'STARTED') {
+                // the media was successfully started playing
+            } else if (s == 'STOPPED') {
+                // the media was stopped
+            } else if (s == 'STOPPED_FOCUS_LOSS') {
+                // the media was stopped after other app requested focus
+            } else if (s == 'ERROR') {
+                // the media raised an error
+            }
+        },
+        function (e) {
+            console.log('ERROR navigator.multiPlayer.initialize');
+        },
+        // streaming url
+        url,
+        // Android Only (optional):
+        //   on android 11+ usign MusicControls plugin, disconnect may not end the service and/or notification,
+        //   this flag force cancel the MusicControls notification when the service is destroyed, enabling to terminate the process properlly
+        true
+    );
 }
 ...
 

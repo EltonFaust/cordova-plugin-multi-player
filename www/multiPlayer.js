@@ -5,8 +5,8 @@ var MultiPlayer = (function () {
         this.STREAM_ALARM = 4;
     }
 
-    MultiPlayerConstruct.prototype.initialize = function (successCallback, failureCallback, url) {
-        cordova.exec(successCallback, failureCallback, 'MultiPlayer', 'initialize', [ url ]);
+    MultiPlayerConstruct.prototype.initialize = function (successCallback, failureCallback, url, autoKillNotification) {
+        cordova.exec(successCallback, failureCallback, 'MultiPlayer', 'initialize', [ url, autoKillNotification || false ]);
     };
 
     MultiPlayerConstruct.prototype.connect = function (successCallback, failureCallback) {

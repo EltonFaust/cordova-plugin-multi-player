@@ -1,11 +1,11 @@
 {
     "name": "cordova-plugin-multi-player",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "Streaming Plugin",
     "cordova": {
         "id": "cordova-plugin-multi-player",
         "platforms": [
-            "android", "ios"
+            "android", "ios", "browser"
         ]
     },
     "repository": {

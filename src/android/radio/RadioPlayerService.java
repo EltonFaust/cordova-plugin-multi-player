@@ -84,6 +84,11 @@ public class RadioPlayerService extends Service {
     private String mRadioUrl;
 
     /**
+     * Auto kill music controls notification on destroy
+     */
+    private boolean mRadioKillNotification = false;
+
+    /**
      * Current radio Stream Type
      */
     private int mRadioStreamType = AudioManager.STREAM_MUSIC;
@@ -123,6 +128,8 @@ public class RadioPlayerService extends Service {
      */
     private com.google.android.exoplayer2.audio.AudioAttributes mPlayerAudioAttributes;
 
+    private Notification serviceNotification = null;
+    private int startWithNotificationID = 0;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -160,10 +167,10 @@ public class RadioPlayerService extends Service {
 
         this.mRadioState = State.IDLE;
 
-        Notification serviceNotification = null;
-        int startWithNotificationID = 0;
+        this.serviceNotification = null;
+        this.startWithNotificationID = 0;
 
-        // tryes to get the Music Control notification
+        // tries to get the Music Control notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             serviceNotification = this.getActiveNotification(MUSIC_CONTROL_NOTIFICATION);
 
@@ -208,8 +215,16 @@ public class RadioPlayerService extends Service {
         this.stopForeground(false);
         this.stopSelf();
 
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(NOTIFICATION_ID);
+        if (
+            this.startWithNotificationID != 0
+            && (
+                this.mRadioKillNotification
+                || this.startWithNotificationID == NOTIFICATION_ID
+            )
+        ) {
+            NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(this.startWithNotificationID);
+        }
 
         this.releasePlayer();
 
@@ -223,6 +238,10 @@ public class RadioPlayerService extends Service {
 
     public void setStreamURL(String mRadioUrl) {
         this.mRadioUrl = mRadioUrl;
+    }
+
+    public void setAutoKillNotification(boolean mRadioKillNotification) {
+        this.mRadioKillNotification = mRadioKillNotification;
     }
 
     /**
@@ -291,7 +310,7 @@ public class RadioPlayerService extends Service {
     }
 
     public void setListener(RadioListener mListener) {
-        this.mListenerList = new ArrayList<RadioListener>();
+        this.mListenerList.clear();
         this.mListenerList.add(mListener);
     }
 
