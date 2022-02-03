@@ -6,8 +6,8 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 ## Supported Platforms
 
 - Android
-- iOS
 - Browser (new)
+- iOS (not tested, use at your on risk)
 
 
 ## Requirements
@@ -52,7 +52,7 @@ onDeviceReady: function() {
             } else if (s == 'STOPPED') {
                 // the media was stopped
             } else if (s == 'STOPPED_FOCUS_LOSS') {
-                // the media was stopped after other app requested focus
+                // the media was stopped after other app requested focus (Android only)
             } else if (s == 'ERROR') {
                 // the media raised an error
             }

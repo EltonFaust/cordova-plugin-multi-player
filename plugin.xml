@@ -67,7 +67,7 @@
                 <string>audio</string>
             </array>
         </config-file>
-        <config-file paSrent="/*" target="config.xml">
+        <config-file parent="/*" target="config.xml">
             <feature name="MultiPlayer">
                 <param name="ios-package" value="MultiPlayer" />
             </feature>
