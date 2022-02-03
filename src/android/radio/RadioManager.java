@@ -23,7 +23,12 @@ public class RadioManager implements IRadioManager {
     /**
      * Streaming url to listen
      */
-    private static String streamURL;
+    private static String streamURL = null;
+
+    /**
+     * Auto kill service music control notification
+     */
+    private static boolean autoKillNotification = false;
 
     /**
      * Singleton
@@ -107,6 +112,11 @@ public class RadioManager implements IRadioManager {
     }
 
     @Override
+    public void setAutoKillNotification(boolean autoKillNotification) {
+        this.autoKillNotification = autoKillNotification;
+    }
+
+    @Override
     public void startRadio() {
         this.startRadio(-1);
     }
@@ -146,10 +156,10 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void registerListener(RadioListener mRadioListener) {
+        this.mRadioListenerQueue.add(mRadioListener);
+
         if (this.isServiceConnected) {
             this.mService.registerListener(mRadioListener);
-        } else {
-            this.mRadioListenerQueue.add(mRadioListener);
         }
     }
 
@@ -159,11 +169,11 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void setListener(RadioListener mRadioListener) {
+        this.mRadioListenerQueue.clear();
+        this.mRadioListenerQueue.add(mRadioListener);
+
         if (this.isServiceConnected) {
             this.mService.setListener(mRadioListener);
-        } else {
-            this.mRadioListenerQueue = new ArrayList<RadioListener>();
-            this.mRadioListenerQueue.add(mRadioListener);
         }
     }
 
@@ -174,7 +184,11 @@ public class RadioManager implements IRadioManager {
     @Override
     public void unregisterListener(RadioListener mRadioListener) {
         log("Register unregistered.");
-        this.mService.unregisterListener(mRadioListener);
+        this.mRadioListenerQueue.remove(mRadioListener);
+
+        if (this.isServiceConnected) {
+            this.mService.unregisterListener(mRadioListener);
+        }
     }
 
     /**
@@ -211,21 +225,33 @@ public class RadioManager implements IRadioManager {
 
             RadioManager.this.mService = ((RadioPlayerService.LocalBinder) binder).getService();
             RadioManager.this.mService.setStreamURL(RadioManager.this.streamURL);
+            RadioManager.this.mService.setAutoKillNotification(RadioManager.this.autoKillNotification);
             RadioManager.this.isServiceConnected = true;
 
-            if (!RadioManager.this.mRadioListenerQueue.isEmpty()) {
-                for (RadioListener mRadioListener : RadioManager.this.mRadioListenerQueue) {
-                    registerListener(mRadioListener);
-                    mRadioListener.onRadioConnected();
-                }
+            for (RadioListener mRadioListener : RadioManager.this.mRadioListenerQueue) {
+                RadioManager.this.mService.registerListener(mRadioListener);
+                mRadioListener.onRadioConnected();
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             log("Service Disconnected.");
+
+            if (RadioManager.this.isServiceConnected) {
+                for (RadioListener mRadioListener : RadioManager.this.mRadioListenerQueue) {
+                    mRadioListener.onRadioConnected();
+
+                    try {
+                        RadioManager.this.mService.registerListener(mRadioListener);
+                    } catch (Exception e) {
+                        log("Can't complete service Disconnected.");
+                    }
+                }
+            }
+
+            RadioManager.this.mService = null;
             RadioManager.this.isServiceConnected = false;
-            // RadioManager.this.mService = null;
         }
     };
 

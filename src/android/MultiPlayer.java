@@ -17,13 +17,14 @@ public class MultiPlayer extends CordovaPlugin implements RadioListener {
     private JSONArray requestedPlay = null;
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    public synchronized boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         log("ACTION - " + action);
 
         if ("initialize".equals(action)) {
             try {
                 this.mRadioManager = RadioManager.with(this.cordova.getActivity(), this);
                 this.mRadioManager.setStreamURL(args.getString(0));
+                this.mRadioManager.setAutoKillNotification(args.getBoolean(1));
 
                 this.connectionCallbackContext = callbackContext;
 
@@ -31,62 +32,97 @@ public class MultiPlayer extends CordovaPlugin implements RadioListener {
                 pluginResult.setKeepCallback(true);
 
                 callbackContext.sendPluginResult(pluginResult);
-                return true;
             } catch (Exception e) {
-                log("Exception occurred: ".concat(e.getMessage()));
+                log("Exception occurred during initialize: ".concat(e.getMessage()));
                 callbackContext.error(e.getMessage());
-                return false;
             }
         } else if ("connect".equals(action)) {
             if (!this.isConnected && !this.isConnecting) {
                 this.isConnecting = true;
-                this.mRadioManager.connect();
+
+                try {
+                    this.mRadioManager.connect();
+                } catch (Exception e) {
+                    log("Exception occurred during connect: ".concat(e.getMessage()));
+                    this.isConnecting = false;
+                    callbackContext.error(e.getMessage());
+                    return true;
+                }
             }
 
             callbackContext.success();
-            return true;
         } else if ("disconnect".equals(action)) {
             this.requestedPlay = null;
+            boolean canDisconnect = this.isConnecting || this.isConnected;
 
-            if (this.isConnecting || this.isConnected) {
-                this.isConnecting = false;
-                this.isConnected = false;
-                this.mRadioManager.disconnect();
+            if (canDisconnect) {
+                try {
+                    this.isConnecting = false;
+                    this.isConnected = false;
+                    this.mRadioManager.disconnect();
+                } catch (Exception e) {
+                    log("Exception occurred during disconnect: ".concat(e.getMessage()));
+                    callbackContext.error(e.getMessage());
+                    return true;
+                }
+            }
 
+            callbackContext.success();
+
+            if (canDisconnect) {
                 log("RADIO STATE - DISCONNECTED...");
                 this.sendListenerResult("DISCONNECTED");
             }
-
-            callbackContext.success();
-            return true;
         } else if ("play".equals(action)) {
             if (!this.isConnected) {
+                this.requestedPlay = args;
+
                 if (!this.isConnecting) {
                     this.isConnecting = true;
-                    this.mRadioManager.connect();
-                }
 
-                this.requestedPlay = args;
+                    try {
+                        this.mRadioManager.connect();
+                    } catch (Exception e) {
+                        log("Exception occurred during play auto connect: ".concat(e.getMessage()));
+                        this.isConnecting = false;
+                        this.requestedPlay = null;
+                        callbackContext.error(e.getMessage());
+                        return true;
+                    }
+                }
             } else {
                 this.requestedPlay = null;
-                this.mRadioManager.startRadio(args.getInt(0));
+
+                try {
+                    this.mRadioManager.startRadio(args.getInt(0));
+                } catch (Exception e) {
+                    log("Exception occurred during play: ".concat(e.getMessage()));
+                    callbackContext.error(e.getMessage());
+                    return true;
+                }
             }
 
             callbackContext.success();
-            return true;
         } else if ("stop".equals(action)) {
             this.requestedPlay = null;
 
             if (this.isConnected) {
-               this.mRadioManager.stopRadio();
+                try {
+                    this.mRadioManager.stopRadio();
+                } catch (Exception e) {
+                    log("Exception occurred during stop: ".concat(e.getMessage()));
+                    callbackContext.error(e.getMessage());
+                    return true;
+                }
             }
 
             callbackContext.success();
-            return true;
+        } else {
+            log("Called invalid action: " + action);
+            return false;
         }
 
-        log("Called invalid action: " + action);
-        return false;
+        return true;
     }
 
     @Override
@@ -114,6 +150,16 @@ public class MultiPlayer extends CordovaPlugin implements RadioListener {
     }
 
     @Override
+    public void onRadioDisconnected() {
+        this.isConnecting = false;
+        this.isConnected = false;
+        this.requestedPlay = null;
+
+        log("RADIO STATE - DISCONNECTED...");
+        this.sendListenerResult("DISCONNECTED");
+    }
+
+    @Override
     public void onRadioStarted() {
         log("RADIO STATE - PLAYING...");
         this.sendListenerResult("STARTED");
@@ -133,6 +179,7 @@ public class MultiPlayer extends CordovaPlugin implements RadioListener {
 
     @Override
     public void onError() {
+        log("RADIO STATE - ERROR...");
         this.sendListenerResult("ERROR");
     }
 

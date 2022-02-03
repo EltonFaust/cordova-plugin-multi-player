@@ -2,6 +2,7 @@ package com.eltonfaust.multiplayer;
 
 public interface IRadioManager {
     void setStreamURL(String streamURL);
+    void setAutoKillNotification(boolean killNotification);
     void startRadio();
     void startRadio(int streamType);
     void stopRadio();
