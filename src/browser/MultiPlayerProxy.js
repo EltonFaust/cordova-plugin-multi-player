@@ -14,6 +14,31 @@ var MultiPlayerProxy = (function () {
     var requestedInitPlaying = false;
     var requestedPlay = false;
 
+    function unloadPlayer() {
+        isPlaying = false;
+        requestedInitPlaying = false;
+        requestedPlay = false;
+
+        // set a blank audio to force stop loading from streaming
+        sourceEl.src = blankAudio;
+        audioEl.load();
+        audioEl.loop = true;
+
+        var playPromise = audioEl.play();
+
+        if (playPromise) {
+            playPromise.then(function () {
+                audioEl.pause();
+            }).catch(function (e) {
+                audioEl.pause();
+            })
+        } else {
+            setTimeout(function () {
+                audioEl.pause();
+            });
+        }
+    }
+
     function sendErrorNotInitialized(failureCallback) {
         if (streamUrl) {
             return true;
@@ -28,6 +53,7 @@ var MultiPlayerProxy = (function () {
             return;
         }
 
+        unloadPlayer();
         sendListenerResult('ERROR');
     }
 
@@ -40,6 +66,10 @@ var MultiPlayerProxy = (function () {
     }
 
     function playingListener() {
+        if (!sourceEl.src || sourceEl.src == blankAudio) {
+            return;
+        }
+
         isPlaying = true;
         requestedInitPlaying = false;
         requestedPlay = false;
@@ -48,18 +78,16 @@ var MultiPlayerProxy = (function () {
     }
 
     function pausedListener() {
-        isPlaying = false;
-        requestedInitPlaying = false;
+        if (!sourceEl.src || sourceEl.src == blankAudio) {
+            return;
+        }
 
-        // set a blank audio to force stop loading from streaming
-        sourceEl.src = blankAudio;
-        audioEl.load();
-
+        unloadPlayer();
         sendListenerResult('STOPPED');
     }
 
-    function initialize(successCallback, failureCallback, url) {
-        streamUrl = url;
+    function initialize(successCallback, failureCallback, params) {
+        streamUrl = params[0];
         audioEl = window.document.createElement('audio');
         sourceEl = window.document.createElement('source');
         audioEl.appendChild(sourceEl);
@@ -135,14 +163,12 @@ var MultiPlayerProxy = (function () {
 
         sourceEl.src = streamUrl;
         audioEl.load();
+        audioEl.loop = false;
 
         var playPromise = audioEl.play();
 
         if (playPromise) {
-            playPromise.catch(function () {
-                requestedInitPlaying = false;
-                errorListener();
-            });
+            playPromise.catch(errorListener);
         }
 
         successCallback && successCallback();
@@ -159,8 +185,6 @@ var MultiPlayerProxy = (function () {
         }
 
         audioEl.pause();
-        requestedPlay = false;
-
         successCallback && successCallback();
     };
 
