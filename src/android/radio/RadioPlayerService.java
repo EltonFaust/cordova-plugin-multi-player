@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
@@ -199,7 +200,11 @@ public class RadioPlayerService extends Service {
         }
 
         if (serviceNotification != null) {
-            this.startForeground(startWithNotificationID, serviceNotification);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                this.startForeground(startWithNotificationID, serviceNotification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            } else {
+                this.startForeground(startWithNotificationID, serviceNotification);
+            }
         }
 
         PowerManager powerMgr = (PowerManager) this.getSystemService(POWER_SERVICE);
