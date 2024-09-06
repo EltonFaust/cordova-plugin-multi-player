@@ -10,9 +10,6 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-// import android.media.AudioAttributes;
-// import android.media.AudioFocusRequest;
-// import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -20,10 +17,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
-import android.widget.RemoteViews;
 
+import androidx.annotation.RequiresApi;
+
+import android.media.AudioManager;
+// import android.media.AudioFocusRequest;
+// import android.media.AudioAttributes;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
@@ -52,11 +52,8 @@ import java.util.List;
 public class RadioPlayerService extends Service {
     private static final String LOG_TAG = "MultiPlayer";
 
-    /**
-     * Radio buffer and decode capacity(DEFAULT VALUES)
-     */
-    private final int AUDIO_BUFFER_CAPACITY_MS = 800;
-    private final int AUDIO_DECODE_CAPACITY_MS = 400;
+    private final int LIVE_TARGET_OFFSET_MS = 5000;
+    private final float LIVE_MAX_PLAYBACK_SPEED = 1.02f;
 
     // Music Control plugin notification id
     public static final int MUSIC_CONTROL_NOTIFICATION = 7824;
@@ -128,12 +125,12 @@ public class RadioPlayerService extends Service {
     /**
      * AudioFocusRequest
      */
-    private AudioFocusRequest mAudioFocusRequest;
+    // private AudioFocusRequest mAudioFocusRequest;
 
     /**
      * AudioAttributes
      */
-    private AudioAttributes mAudioAttributes;
+    // private AudioAttributes mAudioAttributes;
 
     /**
      * com.google.android.exoplayer2.audio.AudioAttributes
@@ -274,13 +271,14 @@ public class RadioPlayerService extends Service {
             this.mRadioStreamType = streamType;
         }
 
-        int result = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        int result = AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        // int result = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            result = this.requestAudioFocus(changeAudioStreamType);
-        } else {
-            result = this.mAudioManager.requestAudioFocus(this.audioFocusChangeListener, this.mRadioStreamType, AudioManager.AUDIOFOCUS_GAIN);
-        }
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        //     result = this.requestAudioFocus(changeAudioStreamType);
+        // } else {
+        //     result = this.mAudioManager.requestAudioFocus(this.audioFocusChangeListener, this.mRadioStreamType, AudioManager.AUDIOFOCUS_GAIN);
+        // }
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             ExoPlayer player = RadioPlayerService.this.getPlayer(changeAudioStreamType);
@@ -377,7 +375,7 @@ public class RadioPlayerService extends Service {
             ExoPlayer player = new ExoPlayer.Builder(dataSourceFactory, extractorsFactory)
                 .setMediaSourceFactory(
                     new DefaultMediaSourceFactory(this.getApplicationContext())
-                        .setLiveTargetOffsetMs(5000)
+                        .setLiveTargetOffsetMs(LIVE_TARGET_OFFSET_MS)
                 )
                 .setAudioAttributes(
                     AudioAttributes.Builder()
@@ -392,7 +390,7 @@ public class RadioPlayerService extends Service {
                 .setUri(Uri.parse(this.mRadioUrl))
                 .setLiveConfiguration(
                     new MediaItem.LiveConfiguration.Builder()
-                        .setMaxPlaybackSpeed(1.02f)
+                        .setMaxPlaybackSpeed(LIVE_MAX_PLAYBACK_SPEED)
                         .build()
                 )
                 .build();
@@ -443,11 +441,11 @@ public class RadioPlayerService extends Service {
             this.mRadioPlayer = null;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.abandonAudioFocus();
-        } else {
-            this.mAudioManager.abandonAudioFocus(this.audioFocusChangeListener);
-        }
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        //     this.abandonAudioFocus();
+        // } else {
+        //     this.mAudioManager.abandonAudioFocus(this.audioFocusChangeListener);
+        // }
     }
 
     private ExoPlayer.Listener playerEventListener = new ExoPlayer.Listener() {
@@ -511,7 +509,11 @@ public class RadioPlayerService extends Service {
 
         @Override
         public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-            if (playWhenReady && reason == ExoPlayer.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST && RadioPlayerService.this.mRadioState != State.PLAYING) {
+            if (
+                playWhenReady
+                && reason == ExoPlayer.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST
+                && RadioPlayerService.this.mRadioState != State.PLAYING
+            ) {
                 // The player is only playing if the state is Player.STATE_READY and playWhenReady=true
                 RadioPlayerService.this.log("Player state changed. Playing");
                 RadioPlayerService.this.mRadioState = State.PLAYING;
@@ -577,8 +579,14 @@ public class RadioPlayerService extends Service {
     // @RequiresApi(api = Build.VERSION_CODES.O)
     // private int requestAudioFocus(boolean recreateAttribute) {
     //     if (this.mAudioAttributes == null || recreateAttribute) {
-    //         int audioUsageType = this.mRadioStreamType == AudioManager.STREAM_ALARM ? AudioAttributes.USAGE_ALARM : AudioAttributes.USAGE_MEDIA;
-    //         this.mAudioAttributes = new AudioAttributes.Builder().setUsage(audioUsageType).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build();
+    //         int audioUsageType = this.mRadioStreamType == AudioManager.STREAM_ALARM
+    //             ? C.AudioUsage.USAGE_ALARM
+    //             : C.AudioUsage.USAGE_MEDIA;
+
+    //         this.mAudioAttributes = new AudioAttributes.Builder()
+    //             .setUsage(audioUsageType)
+    //             .setContentType(C.AudioContentType.AUDIO_CONTENT_TYPE_MUSIC)
+    //             .build();
     //     }
 
     //     if (this.mAudioFocusRequest == null || recreateAttribute) {
