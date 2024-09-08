@@ -9,16 +9,6 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 - Browser (new)
 - iOS (not tested, use at your own risk)
 
-
-## Requirements
-
-Starting to version `2.1.0`, requires `cordova@8`, `cordova-android@8` and the use of androidx (required for the latest ExoPlayer version, that is not yet available on cordova).
-To complain with androidx requirements (if not available yet), you can install the plugins [cordova-plugin-androidx](https://github.com/dpa99c/cordova-plugin-androidx) and [cordova-plugin-androidx-adapter](https://github.com/dpa99c/cordova-plugin-androidx-adapter) with:
-```sh
-cordova plugin add cordova-plugin-androidx
-cordova plugin add cordova-plugin-androidx-adapter
-```
-
 ## Installation
 
 ```sh

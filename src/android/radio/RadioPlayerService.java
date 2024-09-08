@@ -444,28 +444,6 @@ public class RadioPlayerService extends Service {
             }
         }
 
-        // @Override
-        // public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        //     if (playWhenReady && playbackState == ExoPlayer.STATE_READY && RadioPlayerService.this.mRadioState != State.PLAYING) {
-        //         // The player is only playing if the state is Player.STATE_READY and playWhenReady=true
-        //         RadioPlayerService.this.log("Player state changed. Playing");
-        //         RadioPlayerService.this.mRadioState = State.PLAYING;
-        //         RadioPlayerService.this.notifyRadioStarted();
-        //     } else if (playbackState == ExoPlayer.STATE_IDLE && RadioPlayerService.this.mRadioState == State.PLAYING) {
-        //         // Player.STATE_IDLE: This is the initial state, the state when the player is stopped, and when playback failed.
-        //         RadioPlayerService.this.log("Player state changed. Stopped");
-        //         RadioPlayerService.this.releasePlayer();
-        //         RadioPlayerService.this.notifyRadioStopped();
-        //     } else if (playbackState == ExoPlayer.STATE_IDLE && RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_LOSS) {
-        //         // focus loss, notify and set state to STOPPED
-        //         RadioPlayerService.this.log("Player state changed. Stopped focus loss");
-        //         RadioPlayerService.this.releasePlayer();
-        //         RadioPlayerService.this.notifyRadioStoppedFocusLoss();
-        //     } else {
-        //         RadioPlayerService.this.log("Player state changed. ExoPlayer State: " + playbackState + ", Current state: " + RadioPlayerService.this.mRadioState);
-        //     }
-        // }
-
         @Override
         public void onPlaybackStateChanged(int playbackState) {
             if (playbackState == ExoPlayer.STATE_IDLE && RadioPlayerService.this.mRadioState == State.PLAYING) {
