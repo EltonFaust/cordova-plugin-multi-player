@@ -137,7 +137,7 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void stopRadio() {
-        this.mService.stop();
+        this.mService.stop(true);
     }
 
     /**

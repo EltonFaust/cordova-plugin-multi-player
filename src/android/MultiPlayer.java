@@ -172,6 +172,18 @@ public class MultiPlayer extends CordovaPlugin implements RadioListener {
     }
 
     @Override
+    public void onRadioStoppedFocusTransient() {
+        log("RADIO STATE - STOPPED FOCUS TRANSIENT...");
+        this.sendListenerResult("STOPPED_FOCUS_TRANSIENT");
+    }
+
+    @Override
+    public void onRadioStartedFocusTransient() {
+        log("RADIO STATE - STARTED FOCUS TRANSIENT...");
+        this.sendListenerResult("STARTED_FOCUS_TRANSIENT");
+    }
+
+    @Override
     public void onRadioStoppedFocusLoss() {
         log("RADIO STATE - STOPPED FOCUS LOSS...");
         this.sendListenerResult("STOPPED_FOCUS_LOSS");
