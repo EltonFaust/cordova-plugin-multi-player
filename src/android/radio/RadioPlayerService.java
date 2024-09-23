@@ -396,6 +396,7 @@ public class RadioPlayerService extends Service {
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
             this.mRadioPlayer = new ExoPlayer.Builder(this.getApplicationContext())
+                .setLooper(RadioManager.getRequestHandler().getLooper())
                 .setMediaSourceFactory(
                     new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory)
                         .setLiveTargetOffsetMs(LIVE_TARGET_OFFSET_MS)
