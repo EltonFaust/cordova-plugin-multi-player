@@ -467,14 +467,25 @@ public class RadioPlayerService extends Service {
         @Override
         public void onPlayerError(PlaybackException error) {
             if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
-                ExoPlayer player = RadioPlayerService.this.getPlayer();
-                player.seekToDefaultPosition();
-                player.prepare();
                 RadioPlayerService.this.log("FELL BEHIND, RE-INITIALIZING AT THE LIVE EDGE..");
+
+                RadioManager.getRequestHandler().post(new Runnable() {
+                    public void run() {
+                        ExoPlayer player = RadioPlayerService.this.getPlayer();
+
+                        player.seekToDefaultPosition();
+                        player.prepare();
+                    }
+                });
             } else {
-                RadioPlayerService.this.releasePlayer();
-                RadioPlayerService.this.notifyErrorOccured();
                 RadioPlayerService.this.log("ERROR OCCURED.");
+
+                RadioManager.getRequestHandler().post(new Runnable() {
+                    public void run() {
+                        RadioPlayerService.this.releasePlayer();
+                        RadioPlayerService.this.notifyErrorOccured();
+                    }
+                });
             }
         }
 
@@ -486,8 +497,13 @@ public class RadioPlayerService extends Service {
             ) {
                 // Player.STATE_IDLE: This is the initial state, the state when the player is stopped, and when playback failed.
                 RadioPlayerService.this.log("Player state changed. Stopped");
-                RadioPlayerService.this.releasePlayer();
-                RadioPlayerService.this.notifyRadioStopped();
+
+                RadioManager.getRequestHandler().post(new Runnable() {
+                    public void run() {
+                        RadioPlayerService.this.releasePlayer();
+                        RadioPlayerService.this.notifyRadioStopped();
+                    }
+                });
             } else if (
                 playbackState == ExoPlayer.STATE_IDLE
                 && RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_TRANSIENT
@@ -501,8 +517,13 @@ public class RadioPlayerService extends Service {
             ) {
                 // focus loss, notify and set state to STOPPED
                 RadioPlayerService.this.log("Player state changed. Stopped focus loss");
-                RadioPlayerService.this.releasePlayer();
-                RadioPlayerService.this.notifyRadioStoppedFocusLoss();
+
+                RadioManager.getRequestHandler().post(new Runnable() {
+                    public void run() {
+                        RadioPlayerService.this.releasePlayer();
+                        RadioPlayerService.this.notifyRadioStoppedFocusLoss();
+                    }
+                });
             } else {
                 RadioPlayerService.this.log("Player state changed. ExoPlayer State: " + playbackState + ", Current state: " + RadioPlayerService.this.mRadioState);
             }
@@ -540,21 +561,25 @@ public class RadioPlayerService extends Service {
                 return;
             }
 
-            if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-                RadioPlayerService.this.mRadioPlayer.setVolume(0.2f);
-            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-                RadioPlayerService.this.mRadioPlayer.setVolume(1f);
+            RadioManager.getRequestHandler().post(new Runnable() {
+                public void run() {
+                    if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                        RadioPlayerService.this.mRadioPlayer.setVolume(0.2f);
+                    } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                        RadioPlayerService.this.mRadioPlayer.setVolume(1f);
 
-                if (RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_TRANSIENT) {
-                    RadioPlayerService.this.mRadioPlayer.setPlayWhenReady(true);
+                        if (RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_TRANSIENT) {
+                            RadioPlayerService.this.mRadioPlayer.setPlayWhenReady(true);
+                        }
+                    } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                        RadioPlayerService.this.mRadioState = State.STOPPED_FOCUS_TRANSIENT;
+                        RadioPlayerService.this.stop();
+                    } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                        RadioPlayerService.this.mRadioState = State.STOPPED_FOCUS_LOSS;
+                        RadioPlayerService.this.stop();
+                    }
                 }
-            } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-                RadioPlayerService.this.mRadioState = State.STOPPED_FOCUS_TRANSIENT;
-                RadioPlayerService.this.stop();
-            } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-                RadioPlayerService.this.mRadioState = State.STOPPED_FOCUS_LOSS;
-                RadioPlayerService.this.stop();
-            }
+            });
         }
     };
 
