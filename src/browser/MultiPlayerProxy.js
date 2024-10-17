@@ -7,12 +7,21 @@ var MultiPlayerProxy = (function () {
     var audioEl;
     var sourceEl;
     var streamUrl;
+    var stallTimeout;
     var sendListenerResult = noop;
 
     var isConnected = false;
     var isPlaying = false;
     var requestedInitPlaying = false;
     var requestedPlay = false;
+    var curStallTimeout = null;
+
+    function clearStallTimeout() {
+        if (curStallTimeout) {
+            clearTimeout(curStallTimeout);
+            curStallTimeout = null;
+        }
+    }
 
     function unloadPlayer() {
         isPlaying = false;
@@ -49,6 +58,8 @@ var MultiPlayerProxy = (function () {
     }
 
     function errorListener() {
+        clearStallTimeout();
+
         if (!sourceEl.src || sourceEl.src == blankAudio) {
             return;
         }
@@ -58,6 +69,8 @@ var MultiPlayerProxy = (function () {
     }
 
     function loadingListener() {
+        clearStallTimeout();
+
         if (!sourceEl.src || sourceEl.src == blankAudio) {
             return;
         }
@@ -66,6 +79,8 @@ var MultiPlayerProxy = (function () {
     }
 
     function playingListener() {
+        clearStallTimeout();
+
         if (!sourceEl.src || sourceEl.src == blankAudio) {
             return;
         }
@@ -78,6 +93,8 @@ var MultiPlayerProxy = (function () {
     }
 
     function pausedListener() {
+        clearStallTimeout();
+
         if (!sourceEl.src || sourceEl.src == blankAudio) {
             return;
         }
@@ -87,7 +104,9 @@ var MultiPlayerProxy = (function () {
     }
 
     function initialize(successCallback, failureCallback, params) {
+        console.log('stallTimeout', params[2]);
         streamUrl = params[0];
+        stallTimeout = params[2];
         audioEl = window.document.createElement('audio');
         sourceEl = window.document.createElement('source');
         audioEl.appendChild(sourceEl);
@@ -110,6 +129,16 @@ var MultiPlayerProxy = (function () {
         audioEl.addEventListener('playing', playingListener);
         audioEl.addEventListener('pause', pausedListener);
         audioEl.addEventListener('loadstart', loadingListener);
+
+        audioEl.addEventListener('stalled', function () {
+            if (!stallTimeout) {
+                return;
+            }
+
+            clearStallTimeout();
+
+            curStallTimeout = setTimeout(errorListener, stallTimeout);
+        });
 
         isConnected = true;
 

@@ -59,7 +59,11 @@ onDeviceReady: function() {
         // Android Only (optional):
         //   on android 11+ usign MusicControls plugin, disconnect may not end the service and/or notification,
         //   this flag force cancel the MusicControls notification when the service is destroyed, enabling to terminate the process properlly
-        true
+        true,
+        // Browser only (optional):
+        // timeout when the stream stall (in ms), will stop the stop the stream and trigger an "ERROR" event
+        // this value is optional, if not provided, the stream can be stalled indefinitely
+        5000
     );
 }
 ...
