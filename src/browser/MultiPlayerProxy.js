@@ -104,7 +104,6 @@ var MultiPlayerProxy = (function () {
     }
 
     function initialize(successCallback, failureCallback, params) {
-        console.log('stallTimeout', params[2]);
         streamUrl = params[0];
         stallTimeout = params[2];
         audioEl = window.document.createElement('audio');
