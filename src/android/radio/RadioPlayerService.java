@@ -524,6 +524,14 @@ public class RadioPlayerService extends Service {
                         RadioPlayerService.this.notifyRadioStoppedFocusLoss();
                     }
                 });
+            } else if (
+                playbackState == ExoPlayer.STATE_READY
+                && RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_TRANSIENT
+            ) {
+                // focus regained after an transient loss
+                RadioPlayerService.this.log("Player state changed. Playing - regained focus transient");
+                RadioPlayerService.this.mRadioState = State.PLAYING;
+                RadioPlayerService.this.notifyRadioStartedFocusTransient();
             } else {
                 RadioPlayerService.this.log("Player state changed. ExoPlayer State: " + playbackState + ", Current state: " + RadioPlayerService.this.mRadioState);
             }
@@ -536,12 +544,12 @@ public class RadioPlayerService extends Service {
                 && reason == ExoPlayer.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST
             ) {
                 if (RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_TRANSIENT) {
-                    RadioPlayerService.this.log("Player state changed. Playing - regained focus transient");
+                    RadioPlayerService.this.log("Player state changed when ready. Playing - regained focus transient");
                     RadioPlayerService.this.mRadioState = State.PLAYING;
                     RadioPlayerService.this.notifyRadioStartedFocusTransient();
                 } else if (RadioPlayerService.this.mRadioState != State.PLAYING) {
                     // The player is only playing if the state is Player.STATE_READY and playWhenReady=true
-                    RadioPlayerService.this.log("Player state changed. Playing");
+                    RadioPlayerService.this.log("Player state changed when ready. Playing");
                     RadioPlayerService.this.mRadioState = State.PLAYING;
                     RadioPlayerService.this.notifyRadioStarted();
                 }
@@ -564,17 +572,23 @@ public class RadioPlayerService extends Service {
             RadioManager.getRequestHandler().post(new Runnable() {
                 public void run() {
                     if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                        RadioPlayerService.this.log("Player focus changed. LOSS_TRANSIENT_CAN_DUCK");
                         RadioPlayerService.this.mRadioPlayer.setVolume(0.2f);
                     } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                        RadioPlayerService.this.log("Player focus changed. GAIN");
                         RadioPlayerService.this.mRadioPlayer.setVolume(1f);
 
                         if (RadioPlayerService.this.mRadioState == State.STOPPED_FOCUS_TRANSIENT) {
+                            RadioPlayerService.this.log(" - was stopped transient");
+                            RadioPlayerService.this.mRadioPlayer.prepare();
                             RadioPlayerService.this.mRadioPlayer.setPlayWhenReady(true);
                         }
                     } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                        RadioPlayerService.this.log("Player focus changed. LOSS_TRANSIENT");
                         RadioPlayerService.this.mRadioState = State.STOPPED_FOCUS_TRANSIENT;
                         RadioPlayerService.this.stop();
                     } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                        RadioPlayerService.this.log("Player focus changed. LOSS");
                         RadioPlayerService.this.mRadioState = State.STOPPED_FOCUS_LOSS;
                         RadioPlayerService.this.stop();
                     }
