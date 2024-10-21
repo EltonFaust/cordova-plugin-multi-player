@@ -9,16 +9,6 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 - Browser (new)
 - iOS (not tested, use at your own risk)
 
-
-## Requirements
-
-Starting to version `2.1.0`, requires `cordova@8`, `cordova-android@8` and the use of androidx (required for the latest ExoPlayer version, that is not yet available on cordova).
-To complain with androidx requirements (if not available yet), you can install the plugins [cordova-plugin-androidx](https://github.com/dpa99c/cordova-plugin-androidx) and [cordova-plugin-androidx-adapter](https://github.com/dpa99c/cordova-plugin-androidx-adapter) with:
-```sh
-cordova plugin add cordova-plugin-androidx
-cordova plugin add cordova-plugin-androidx-adapter
-```
-
 ## Installation
 
 ```sh
@@ -51,6 +41,10 @@ onDeviceReady: function() {
                 // the media was successfully started playing
             } else if (s == 'STOPPED') {
                 // the media was stopped
+            } else if (s == 'STOPPED_FOCUS_TRANSIENT') {
+                // the media was stopped after other app requested focus temporarily (Android only)
+            } else if (s == 'STARTED_FOCUS_TRANSIENT') {
+                // the media was auto started after regained facus (Android only)
             } else if (s == 'STOPPED_FOCUS_LOSS') {
                 // the media was stopped after other app requested focus (Android only)
             } else if (s == 'ERROR') {
@@ -65,7 +59,11 @@ onDeviceReady: function() {
         // Android Only (optional):
         //   on android 11+ usign MusicControls plugin, disconnect may not end the service and/or notification,
         //   this flag force cancel the MusicControls notification when the service is destroyed, enabling to terminate the process properlly
-        true
+        true,
+        // Browser only (optional):
+        // timeout when the stream stall (in ms), will stop the stop the stream and trigger an "ERROR" event
+        // this value is optional, if not provided, the stream can be stalled indefinitely
+        5000
     );
 }
 ...
