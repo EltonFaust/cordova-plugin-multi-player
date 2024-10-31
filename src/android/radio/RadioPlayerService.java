@@ -293,9 +293,10 @@ public class RadioPlayerService extends Service {
             || this.mRadioState == State.STOPPED_FOCUS_TRANSIENT
             || this.mRadioState == State.STOPPED_FOCUS_LOSS
         ) {
-            // if force to stop, will force the player as playing
+            // if force to stop, try to stop despite not being as playing
             if (forceStop && this.mRadioState != State.PLAYING) {
-                if (this.mRadioPlayer.getPlaybackState() != ExoPlayer.STATE_IDLE){
+                // if already on iddle, stop wont trigger the change state, only release the player and notify
+                if (this.mRadioPlayer.getPlaybackState() == ExoPlayer.STATE_IDLE) {
                     this.log("Player state changed. Stopped - already on focus loss");
                     this.releasePlayer();
                     this.notifyRadioStopped();
