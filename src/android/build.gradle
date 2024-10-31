@@ -8,6 +8,13 @@ allprojects {
     }
 }
 
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
 dependencies {
-    implementation 'com.google.android.exoplayer:exoplayer:2.11.8'
+    implementation 'androidx.media3:media3-exoplayer:1.4.1'
 }

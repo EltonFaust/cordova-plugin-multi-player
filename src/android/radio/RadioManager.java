@@ -12,8 +12,14 @@ import android.app.Activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.os.HandlerThread;
+import android.os.Handler;
+
 public class RadioManager implements IRadioManager {
     private static final String LOG_TAG = "MultiPlayer";
+
+    private static HandlerThread handlerThread = null;
+    private static Handler requestHandler = null;
 
     /**
      * Streaming url to listen
@@ -137,7 +143,7 @@ public class RadioManager implements IRadioManager {
      */
     @Override
     public void stopRadio() {
-        this.mService.stop();
+        this.mService.stop(true);
     }
 
     /**
@@ -223,15 +229,19 @@ public class RadioManager implements IRadioManager {
         public void onServiceConnected(ComponentName arg0, IBinder binder) {
             log("Service Connected.");
 
-            RadioManager.this.mService = ((RadioPlayerService.LocalBinder) binder).getService();
-            RadioManager.this.mService.setStreamURL(RadioManager.this.streamURL);
-            RadioManager.this.mService.setAutoKillNotification(RadioManager.this.autoKillNotification);
-            RadioManager.this.isServiceConnected = true;
+            getRequestHandler().post(new Runnable() {
+                public void run() {
+                    RadioManager.this.mService = ((RadioPlayerService.LocalBinder) binder).getService();
+                    RadioManager.this.mService.setStreamURL(RadioManager.this.streamURL);
+                    RadioManager.this.mService.setAutoKillNotification(RadioManager.this.autoKillNotification);
+                    RadioManager.this.isServiceConnected = true;
 
-            for (RadioListener mRadioListener : RadioManager.this.mRadioListenerQueue) {
-                RadioManager.this.mService.registerListener(mRadioListener);
-                mRadioListener.onRadioConnected();
-            }
+                    for (RadioListener mRadioListener : RadioManager.this.mRadioListenerQueue) {
+                        RadioManager.this.mService.registerListener(mRadioListener);
+                        mRadioListener.onRadioConnected();
+                    }
+                }
+            });
         }
 
         @Override
@@ -254,6 +264,16 @@ public class RadioManager implements IRadioManager {
             RadioManager.this.isServiceConnected = false;
         }
     };
+
+    public static Handler getRequestHandler() {
+        if (handlerThread == null) {
+            handlerThread = new HandlerThread("PlayerOperation");
+            handlerThread.start();
+            requestHandler = new Handler(handlerThread.getLooper());
+        }
+
+        return requestHandler;
+    }
 
     /**
      * Logger

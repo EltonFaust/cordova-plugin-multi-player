@@ -1,6 +1,6 @@
 {
     "name": "cordova-plugin-multi-player",
-    "version": "2.1.4",
+    "version": "3.0.0",
     "description": "Streaming Plugin",
     "cordova": {
         "id": "cordova-plugin-multi-player",
