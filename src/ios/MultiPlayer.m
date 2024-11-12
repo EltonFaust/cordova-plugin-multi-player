@@ -67,7 +67,7 @@
     NSLog(@"Play \n");
 
     if (self.connected == NO) {
-        [self connect];
+        [self connect:command];
     }
 
     [self mp_sendListenerResult:@"LOADING"];
