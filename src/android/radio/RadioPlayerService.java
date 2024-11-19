@@ -226,7 +226,11 @@ public class RadioPlayerService extends Service {
             notificationManager.cancel(this.startWithNotificationID);
         }
 
-        this.releasePlayer();
+        RadioManager.getRequestHandler().post(new Runnable() {
+            public void run() {
+                RadioPlayerService.this.releasePlayer();
+            }
+        });
 
         if (this.wakeLock != null) {
             this.wakeLock.release();
