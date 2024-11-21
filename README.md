@@ -7,7 +7,7 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 
 - Android
 - Browser (new)
-- iOS (not tested, use at your own risk)
+- iOS
 
 ## Installation
 
@@ -42,11 +42,11 @@ onDeviceReady: function() {
             } else if (s == 'STOPPED') {
                 // the media was stopped
             } else if (s == 'STOPPED_FOCUS_TRANSIENT') {
-                // the media was stopped after other app requested focus temporarily (Android only)
+                // the media was stopped after other app requested focus temporarily (Android/iOS only)
             } else if (s == 'STARTED_FOCUS_TRANSIENT') {
-                // the media was auto started after regained facus (Android only)
+                // the media was auto started after regained facus (Android/iOS only)
             } else if (s == 'STOPPED_FOCUS_LOSS') {
-                // the media was stopped after other app requested focus (Android only)
+                // the media was stopped after other app requested focus (Android/iOS only)
             } else if (s == 'ERROR') {
                 // the media raised an error
             }

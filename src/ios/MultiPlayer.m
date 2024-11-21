@@ -10,6 +10,7 @@
 @property AVPlayer *streamPlayer;
 @property NSString *streamUrl;
 @property BOOL connected;
+@property BOOL interrupted;
 
 - (void)initialize:(CDVInvokedUrlCommand*)command;
 - (void)connect:(CDVInvokedUrlCommand*)command;
@@ -28,6 +29,7 @@
 
     self.callbackId = command.callbackId;
     self.connected = NO;
+    self.interrupted = NO;
     self.streamUrl = [command argumentAtIndex:0];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
@@ -38,7 +40,6 @@
 - (void)connect:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Connect \n");
-    // TODO: maybe do something here
     self.connected = YES;
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -50,8 +51,9 @@
 - (void)disconnect:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Disconnect \n");
-    // TODO: maybe do something here
     self.connected = NO;
+
+    [self mp_unloadPlayer];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -67,12 +69,13 @@
     NSLog(@"Play \n");
 
     if (self.connected == NO) {
-        [self connect];
+        [self connect:command];
     }
 
-    [self mp_sendListenerResult:@"LOADING"];
-
+    self.interrupted = NO;
     NSURL *streamNSURL = [NSURL URLWithString:self.streamUrl];
+
+    [self mp_sendListenerResult:@"LOADING"];
 
     self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL];
     [self.streamPlayer addObserver:self forKeyPath:@"status" options:0 context:nil];
@@ -86,15 +89,30 @@
     NSNumber *interruptionType = (NSNumber*)[notification.userInfo valueForKey:AVAudioSessionInterruptionTypeKey];
     switch ([interruptionType integerValue]) {
         case AVAudioSessionInterruptionTypeBegan:
-            NSLog(@"Stopping...");
-            [self.streamPlayer pause];
-            [self mp_sendListenerResult:@"STOPPED"];
+        {
+            NSLog(@"Interruption began...");
+
+            if (self.streamPlayer != nil) {
+                self.interrupted = YES;
+                [self.streamPlayer pause];
+                [self mp_sendListenerResult:@"STOPPED_FOCUS_TRANSIENT"];
+            }
             break;
+        }
         case AVAudioSessionInterruptionTypeEnded:
         {
             if ([(NSNumber*)[notification.userInfo valueForKey:AVAudioSessionInterruptionOptionKey] intValue] == AVAudioSessionInterruptionOptionShouldResume) {
-                NSLog(@"Playing...");
-                [self.streamPlayer play];
+                NSLog(@"Interruption stopped, resuming ...");
+
+                if (self.streamPlayer != nil) {
+                    [self.streamPlayer play];
+                }
+            } else {
+                NSLog(@"Interruption stopped, but cant resume ...");
+
+                if ([self mp_unloadPlayer]) {
+                    [self mp_sendListenerResult:@"STOPPED_FOCUS_LOSS"];
+                }
             }
             break;
         }
@@ -107,14 +125,7 @@
 {
     NSLog(@"Stop \n");
 
-    BOOL stopping = NO;
-
-    if (self.streamPlayer != nil) {
-        [self.streamPlayer removeObserver:self forKeyPath:@"status" context:nil];
-        [self.streamPlayer pause];
-        self.streamPlayer = nil;
-        stopping = YES;
-    }
+    BOOL stopping = [self mp_unloadPlayer];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -132,12 +143,21 @@
         if (self.streamPlayer.status == AVPlayerStatusFailed) {
             // Some error occoured
             NSLog(@"AVPlayer Failed");
+            self.streamPlayer = nil;
             [self mp_sendListenerResult:@"ERROR"];
         } else if (self.streamPlayer.status == AVPlayerStatusReadyToPlay) {
             NSLog(@"AVPlayerStatusReadyToPlay");
-            [self.streamPlayer play];
 
-            [self mp_sendListenerResult:@"STARTED"];
+            if (self.streamPlayer != nil) {
+                [self.streamPlayer play];
+
+                if (self.interrupted) {
+                    [self mp_sendListenerResult:@"STARTED_FOCUS_TRANSIENT"];
+                    self.interrupted = NO;
+                } else {
+                    [self mp_sendListenerResult:@"STARTED"];
+                }
+            }
         } else if (self.streamPlayer.status == AVPlayerItemStatusUnknown) {
             NSLog(@"AVPlayer Unknown");
             // [self mp_sendListenerResult:@"STOPPED"];
@@ -154,6 +174,19 @@
         [pluginResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
     }
+}
+- (BOOL)mp_unloadPlayer
+{
+    self.interrupted = NO;
+
+    if (self.streamPlayer != nil) {
+        [self.streamPlayer removeObserver:self forKeyPath:@"status" context:nil];
+        [self.streamPlayer pause];
+        self.streamPlayer = nil;
+        return YES;
+    }
+
+    return NO;
 }
 
 @end
