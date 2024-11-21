@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     id="cordova-plugin-multi-player"
-    version="3.0.1">
+    version="3.0.2">
 
     <name>Multi Player Plugin</name>
     <description>Multi Player Plugin</description>
