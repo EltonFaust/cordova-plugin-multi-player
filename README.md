@@ -7,7 +7,7 @@ This plugin has part of its code base on [cordova-plugin-exoplayer](https://gith
 
 - Android
 - Browser (new)
-- iOS (not tested, use at your own risk)
+- iOS
 
 ## Installation
 

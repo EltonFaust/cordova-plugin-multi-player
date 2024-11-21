@@ -52,7 +52,8 @@
 {
     NSLog(@"Disconnect \n");
     self.connected = NO;
-    self.interrupted = NO;
+
+    [self mp_unloadPlayer];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -109,10 +110,7 @@
             } else {
                 NSLog(@"Interruption stopped, but cant resume ...");
 
-                if (self.streamPlayer != nil) {
-                    [self.streamPlayer pause];
-                    self.interrupted = NO;
-                    self.streamPlayer = nil;
+                if ([self mp_unloadPlayer]) {
                     [self mp_sendListenerResult:@"STOPPED_FOCUS_LOSS"];
                 }
             }
@@ -127,15 +125,7 @@
 {
     NSLog(@"Stop \n");
 
-    BOOL stopping = NO;
-    self.interrupted = NO;
-
-    if (self.streamPlayer != nil) {
-        [self.streamPlayer removeObserver:self forKeyPath:@"status" context:nil];
-        [self.streamPlayer pause];
-        self.streamPlayer = nil;
-        stopping = YES;
-    }
+    BOOL stopping = [self mp_unloadPlayer];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -184,6 +174,19 @@
         [pluginResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
     }
+}
+- (BOOL)mp_unloadPlayer
+{
+    self.interrupted = NO;
+
+    if (self.streamPlayer != nil) {
+        [self.streamPlayer removeObserver:self forKeyPath:@"status" context:nil];
+        [self.streamPlayer pause];
+        self.streamPlayer = nil;
+        return YES;
+    }
+
+    return NO;
 }
 
 @end
