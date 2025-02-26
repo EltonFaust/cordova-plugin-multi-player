@@ -79,7 +79,31 @@
 
     self.streamPlayer = [[AVPlayer alloc] initWithURL:streamNSURL];
     [self.streamPlayer addObserver:self forKeyPath:@"status" options:0 context:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioInterrupt:) name:AVAudioSessionInterruptionNotification object:nil];
+
+    // add observer for audio interruptions
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(audioInterrupt:)
+        name:AVAudioSessionInterruptionNotification
+        object:[AVAudioSession sharedInstance]];
+
+    // set audio category
+    NSError *categoryError = nil;
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&categoryError];
+
+    if (categoryError) {
+        NSLog(@"Error setting category! %@", [categoryError description]);
+    }
+
+    // activation of audio session
+    NSError *activationError = nil;
+    BOOL success = [[AVAudioSession sharedInstance] setActive: YES error:&activationError];
+    if (!success) {
+        if (activationError) {
+            NSLog(@"Could not activate audio session. %@", [activationError localizedDescription]);
+        } else {
+            NSLog(@"audio session could not be activated!");
+        }
+    }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
